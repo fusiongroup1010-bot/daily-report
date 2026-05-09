@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Sync Report Form</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+
+        .header { border-bottom: 3px solid #1a5276; padding-bottom: 10px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; }
+        .header-title { flex-grow: 1; text-align: center; }
+        .header-title h1 { color: #1a5276; margin: 0; font-size: 24px; text-transform: uppercase; }
+        .header-title p { margin: 5px 0; color: #666; font-style: italic; }
+
+        .section-title { background-color: #1a5276; color: white; padding: 10px; font-weight: bold; margin-top: 25px; margin-bottom: 0; }
+        .section-title.red { background-color: #c0392b; }
+
+        .table-row { display: flex; border: 1px solid #ddd; border-top: none; }
+        .table-row:first-of-type { border-top: 1px solid #ddd; }
+        .table-col-label {
+            width: 35%;
+            min-width: 35%;
+            max-width: 35%;
+            background-color: #ebedef;
+            padding: 10px 12px;
+            font-weight: bold;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+        .table-col-label small { font-weight: normal; font-size: 11px; color: #555; font-style: italic; margin-top: 3px; }
+        .table-col-input {
+            width: 65%;
+            min-width: 65%;
+            max-width: 65%;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            box-sizing: border-box;
+        }
+        .table-col-input input[type="text"],
+        .table-col-input input[type="date"],
+        .table-col-input textarea,
+        .table-col-input select {
+            width: 100%;
+            border: none;
+            padding: 8px 12px;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+            resize: none;
+            background: transparent;
+        }
+        .table-col-input textarea { min-height: 40px; overflow: hidden; line-height: 1.5; }
+
+        /* Checkbox row – fixed alignment */
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            padding: 10px 14px;
+            gap: 22px;
+            flex-wrap: nowrap;
+        }
+        .checkbox-row label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .checkbox-row input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; flex-shrink: 0; }
+
+        /* Task blocks */
+        .task-group {
+            display: none;
+            border: 1px solid #ddd;
+            border-top: none;
+            background: #fafafa;
+        }
+        .task-group-header {
+            background: #2980b9;
+            color: white;
+            padding: 8px 14px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        /* Checklist */
+        .checklist-group { border: 1px solid #ddd; border-top: none; padding: 10px 14px; }
+        .checklist-item { margin-bottom: 8px; display: flex; align-items: center; gap: 8px; font-size: 14px; }
+        .checklist-item input[type="checkbox"] { width: 16px; height: 16px; }
+
+        /* Buttons */
+        .actions { margin-top: 30px; text-align: center; padding-top: 20px; border-top: 1px solid #ddd; }
+        .btn { padding: 12px 25px; font-size: 15px; font-weight: bold; cursor: pointer; border: none; border-radius: 4px; color: white; margin: 5px 8px; transition: 0.2s; }
+        .btn-save { background-color: #2980b9; } .btn-save:hover { background-color: #1f618d; }
+        .btn-send { background-color: #27ae60; } .btn-send:hover { background-color: #1e8449; }
+        .btn-pdf  { background-color: #e67e22; } .btn-pdf:hover  { background-color: #ca6f1e; }
+
+        /* Config box */
+        .config-box { background: #fdf2e9; padding: 16px 22px; border: 1px solid #f5b041; border-radius: 8px; margin-bottom: 20px; }
+        .config-row { display: flex; gap: 28px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+        .config-field { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 260px; }
+        .config-field label { font-weight: bold; font-size: 14px; white-space: nowrap; color: #555; }
+        .config-field label small { font-weight: normal; color: #888; font-style: italic; }
+        .config-field select, .config-field input[type="time"] { padding: 7px 11px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; background: white; flex-grow: 1; }
+        .config-btn-row { display: flex; gap: 14px; justify-content: center; }
+        .config-save-btn { padding: 9px 20px; cursor: pointer; background: #1a5276; color: white; border: none; border-radius: 5px; font-weight: bold; font-size: 14px; transition: 0.2s; }
+        .config-save-btn:hover { background: #154360; }
+        .config-channel-btn { padding: 9px 20px; background: #2980b9; color: white; border-radius: 5px; font-size: 14px; font-weight: bold; text-decoration: none; transition: 0.2s; }
+        .config-channel-btn:hover { background: #21618c; }
+
+        /* PDF / screenshot mode */
+        .screenshot-mode .config-box,
+        .screenshot-mode .actions { display: none !important; }
+    </style>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+<div class="container">
+
+    <!-- ═══════════════ CONFIG BOX ═══════════════ -->
+    <div class="config-box">
+        <div class="config-row">
+            <div class="config-field">
+                <label>Phương thức <small>(Method)</small>:</label>
+                <select id="config_method">
+                    <option value="email">Email (Gmail SMTP)</option>
+                </select>
+            </div>
+            <div class="config-field">
+                <label>Giờ gửi tự động <small>(Auto-send time)</small>:</label>
+                <input type="time" id="config_time" value="{{ config.report_time }}" oninput="updateTimeDisplay(this.value)">
+            </div>
+        </div>
+        <div class="config-btn-row">
+            <button class="config-save-btn" onclick="saveSystemConfig()">💾 Lưu cấu hình / Save</button>
+            <a href="/settings" class="config-channel-btn">⚙ Cài đặt kênh gửi</a>
+        </div>
+    </div>
+
+    <!-- ═══════════════ HEADER ═══════════════ -->
+    <div class="header">
+        <div style="width:80px;"></div>
+        <div class="header-title">
+            <h1>BÁO CÁO DAILY – PHỐI HỢP LIÊN BỘ PHẬN</h1>
+            <p>DAILY SYNC REPORT</p>
+            <p>Gửi tự động lúc <strong id="display_time">--:--</strong> <span id="ampm_vn">sáng</span> / Sent at <strong id="display_time_en">--:--</strong> <span id="ampm_en">AM</span></p>
+        </div>
+        <div style="width:80px;"></div>
+    </div>
+
+    <form id="reportForm">
+
+        <!-- ─── THÔNG TIN CHUNG ─── -->
+        <div class="section-title">THÔNG TIN CHUNG &nbsp;<small style="font-weight:normal">/ GENERAL INFORMATION</small></div>
+
+        <div class="table-row" style="border-top:1px solid #ddd;">
+            <div class="table-col-label">Ngày báo cáo<br><small>Report Date</small></div>
+            <div class="table-col-input"><input type="date" name="report_date" value="{{ report_data.report_date or '' }}"></div>
+        </div>
+
+        <div class="table-row">
+            <div class="table-col-label">Bộ phận báo cáo<br><small>Reporting Dept / Sender</small></div>
+            <div class="table-col-input">
+                <select name="department" id="department">
+                    <option value="">-- Chọn phòng ban --</option>
+                    <option value="Sale Online"  {% if report_data.department == 'Sale Online'  %}selected{% endif %}>Sale Online</option>
+                    <option value="Sale Offline" {% if report_data.department == 'Sale Offline' %}selected{% endif %}>Sale Offline</option>
+                    <option value="C.S"          {% if report_data.department == 'C.S'          %}selected{% endif %}>C.S (Customer Service)</option>
+                    <option value="Logistics"    {% if report_data.department == 'Logistics'    %}selected{% endif %}>Logistics</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-row">
+            <div class="table-col-label">Bộ phận tiếp nhận<br><small>Receiving Departments</small></div>
+            <div class="table-col-input">
+                <div class="checkbox-row">
+                    {% set rec = report_data.receiving_depts or '' %}
+                    <label><input type="checkbox" name="rec_dept" value="Sale Online"  onchange="toggleTasks()" {% if 'Sale Online'  in rec %}checked{% endif %}> Sale Online</label>
+                    <label><input type="checkbox" name="rec_dept" value="Sale Offline" onchange="toggleTasks()" {% if 'Sale Offline' in rec %}checked{% endif %}> Sale Offline</label>
+                    <label><input type="checkbox" name="rec_dept" value="C.S"          onchange="toggleTasks()" {% if 'C.S'          in rec %}checked{% endif %}> C.S</label>
+                    <label><input type="checkbox" name="rec_dept" value="Logistics"    onchange="toggleTasks()" {% if 'Logistics'    in rec %}checked{% endif %}> Logistics</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── VẤN ĐỀ ƯU TIÊN ─── -->
+        <div class="section-title red" style="margin-top:20px;">🚨 VẤN ĐỀ ƯU TIÊN SỐ 1 HÔM NAY &nbsp;<small style="font-weight:normal">/ TOP PRIORITY ISSUE</small></div>
+
+        <div class="table-row" style="border-top:1px solid #ddd;">
+            <div class="table-col-label">Mô tả vấn đề<br><small>Issue description</small></div>
+            <div class="table-col-input"><textarea name="priority_issue">{{ report_data.priority_issue or '' }}</textarea></div>
+        </div>
+        <div class="table-row">
+            <div class="table-col-label">Tác động / mức độ<br><small>Impact / severity</small></div>
+            <div class="table-col-input"><input type="text" name="priority_impact" value="{{ report_data.priority_impact or '' }}"></div>
+        </div>
+        <div class="table-row">
+            <div class="table-col-label">Deadline xử lý<br><small>Resolution deadline</small></div>
+            <div class="table-col-input"><input type="text" name="priority_deadline" value="{{ report_data.priority_deadline or '' }}"></div>
+        </div>
+
+        <!-- ─── NHIỆM VỤ LIÊN KẾT ─── -->
+        <div class="section-title" style="margin-top:20px;">🔄 NHIỆM VỤ LIÊN KẾT GIỮA CÁC BỘ PHẬN &nbsp;<small style="font-weight:normal">/ CROSS-DEPARTMENT TASKS</small></div>
+
+        <!-- Sale Online -->
+        <div id="task_sale_online" class="task-group">
+            <div class="task-group-header">🛒 Sale Online</div>
+            <div class="table-row" style="border-top:none;">
+                <div class="table-col-label">Nhiệm vụ cần phối hợp<br><small>Tasks to coordinate</small></div>
+                <div class="table-col-input"><textarea name="task_online_info">{{ report_data.task_online_info or '' }}</textarea></div>
+            </div>
+        </div>
+
+        <!-- Sale Offline -->
+        <div id="task_sale_offline" class="task-group">
+            <div class="task-group-header">🏬 Sale Offline</div>
+            <div class="table-row" style="border-top:none;">
+                <div class="table-col-label">Nhiệm vụ cần phối hợp<br><small>Tasks to coordinate</small></div>
+                <div class="table-col-input"><textarea name="task_offline_info">{{ report_data.task_offline_info or '' }}</textarea></div>
+            </div>
+        </div>
+
+        <!-- C.S -->
+        <div id="task_cs" class="task-group">
+            <div class="task-group-header">💬 C.S</div>
+            <div class="table-row" style="border-top:none;">
+                <div class="table-col-label">Nhiệm vụ cần phối hợp<br><small>Tasks to coordinate</small></div>
+                <div class="table-col-input"><textarea name="task_cs_info">{{ report_data.task_cs_info or '' }}</textarea></div>
+            </div>
+        </div>
+
+        <!-- Logistics -->
+        <div id="task_logistics" class="task-group">
+            <div class="task-group-header">📦 Logistics</div>
+            <div class="table-row" style="border-top:none;">
+                <div class="table-col-label">Nhiệm vụ cần phối hợp<br><small>Tasks to coordinate</small></div>
+                <div class="table-col-input"><textarea name="task_logistics_info">{{ report_data.task_logistics_info or '' }}</textarea></div>
+            </div>
+        </div>
+
+        <!-- ─── CHUẨN BỊ NGÀY MAI ─── -->
+        <div class="section-title" style="margin-top:20px;">📋 CHUẨN BỊ TRƯỚC CHO NGÀY MAI &nbsp;<small style="font-weight:normal">/ PREPARATION FOR TOMORROW</small></div>
+
+        <div class="table-row" style="border-top:1px solid #ddd;">
+            <div class="table-col-label">Logistics</div>
+            <div class="table-col-input"><textarea name="prep_logistics">{{ report_data.prep_logistics or '' }}</textarea></div>
+        </div>
+        <div class="table-row">
+            <div class="table-col-label">Sale Online</div>
+            <div class="table-col-input"><textarea name="prep_sales_online">{{ report_data.prep_sales_online or '' }}</textarea></div>
+        </div>
+        <div class="table-row">
+            <div class="table-col-label">C.S</div>
+            <div class="table-col-input"><textarea name="prep_cs">{{ report_data.prep_cs or '' }}</textarea></div>
+        </div>
+        <div class="table-row">
+            <div class="table-col-label">Sale Offline</div>
+            <div class="table-col-input"><textarea name="prep_sales_offline">{{ report_data.prep_sales_offline or '' }}</textarea></div>
+        </div>
+
+        <!-- ─── CHECKLIST ─── -->
+        <div class="section-title" style="margin-top:20px;">✅ CHECKLIST 10 GIÂY &nbsp;<small style="font-weight:normal">/ 10-SECOND CHECKLIST</small></div>
+        <div class="checklist-group">
+            <div class="checklist-item">
+                <input type="checkbox" name="check1" id="check1" {% if report_data.check1 %}checked{% endif %}>
+                <label for="check1">Đã nắm vấn đề ưu tiên số 1 &nbsp;<small style="color:#888; font-style:italic;">/ Top priority issue acknowledged</small></label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" name="check2" id="check2" {% if report_data.check2 %}checked{% endif %}>
+                <label for="check2">Đã xác nhận nhiệm vụ liên kết của bộ phận &nbsp;<small style="color:#888; font-style:italic;">/ Cross-department task confirmed</small></label>
+            </div>
+            <div class="checklist-item" style="margin-bottom:0;">
+                <input type="checkbox" name="check3" id="check3" {% if report_data.check3 %}checked{% endif %}>
+                <label for="check3">Đã nắm deadline &nbsp;<small style="color:#888; font-style:italic;">/ Deadline confirmed</small></label>
+            </div>
+        </div>
+
+    </form>
+
+    <div class="actions">
+        <button class="btn btn-save" onclick="saveReport()">💾 LƯU DỮ LIỆU<br><small style="font-weight:normal">SAVE DATA</small></button>
+        <button class="btn btn-send" onclick="sendTest()">📤 GỬI BÁO CÁO NGAY<br><small style="font-weight:normal">SEND REPORT NOW</small></button>
+        <button class="btn btn-pdf"  onclick="exportPDF()">📄 XUẤT FILE PDF<br><small style="font-weight:normal">EXPORT PDF</small></button>
+        <div id="status-msg" style="margin-top:14px; font-weight:bold; font-size:15px;"></div>
+    </div>
+
+</div><!-- /container -->
+
+<script>
+/* ──────────────────────────────────────
+   Toggle task blocks based on checkboxes
+────────────────────────────────────── */
+function toggleTasks() {
+    var checked = Array.from(document.querySelectorAll('input[name="rec_dept"]:checked')).map(cb => cb.value);
+    document.getElementById('task_sale_online').style.display  = checked.includes('Sale Online')  ? 'block' : 'none';
+    document.getElementById('task_sale_offline').style.display = checked.includes('Sale Offline') ? 'block' : 'none';
+    document.getElementById('task_cs').style.display           = checked.includes('C.S')          ? 'block' : 'none';
+    document.getElementById('task_logistics').style.display    = checked.includes('Logistics')    ? 'block' : 'none';
+}
+
+/* ──────────────────────────────────────
+   Sync header time display with config input
+────────────────────────────────────── */
+function updateTimeDisplay(timeStr) {
+    if (!timeStr) return;
+    var parts = timeStr.split(':');
+    var hour = parseInt(parts[0]), min = parseInt(parts[1]);
+    var h12 = hour, period = 'AM', periodVn = 'sáng';
+    if (hour >= 12) { period = 'PM'; periodVn = 'chiều'; if (hour > 12) h12 = hour - 12; }
+    else if (hour === 0) h12 = 12;
+    var fmt = (h12 < 10 ? '0' : '') + h12 + ':' + (min < 10 ? '0' : '') + min;
+    document.getElementById('display_time').innerText    = fmt;
+    document.getElementById('display_time_en').innerText = fmt;
+    document.getElementById('ampm_vn').innerText = periodVn;
+    document.getElementById('ampm_en').innerText = period;
+}
+
+/* ──────────────────────────────────────
+   Auto-resize all textareas
+────────────────────────────────────── */
+function autoResizeAll() {
+    document.querySelectorAll('textarea').forEach(function(tx) {
+        tx.style.height = 'auto';
+        tx.style.height = tx.scrollHeight + 'px';
+        tx.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+    });
+}
+
+window.onload = function() {
+    toggleTasks();
+    updateTimeDisplay("{{ config.report_time }}");
+    autoResizeAll();
+};
+
+/* ──────────────────────────────────────
+   Save system config (time / method)
+────────────────────────────────────── */
+function saveSystemConfig() {
+    var payload = {
+        send_method: document.getElementById('config_method').value,
+        report_time: document.getElementById('config_time').value
+    };
+    fetch('/update_config', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+    }).then(r => r.json()).then(function(res) {
+        alert(res.message);
+        updateTimeDisplay(payload.report_time);
+    });
+}
+
+/* ──────────────────────────────────────
+   Collect form data
+────────────────────────────────────── */
+function collectFormData() {
+    var form = document.getElementById('reportForm');
+    var data = Object.fromEntries(new FormData(form).entries());
+    data.send_method    = document.getElementById('config_method').value;
+    data.report_time    = document.getElementById('config_time').value;
+    data.receiving_depts = Array.from(form.querySelectorAll('input[name="rec_dept"]:checked')).map(cb => cb.value).join(', ');
+    data.check1 = form.querySelector('input[name="check1"]').checked;
+    data.check2 = form.querySelector('input[name="check2"]').checked;
+    data.check3 = form.querySelector('input[name="check3"]').checked;
+    return data;
+}
+
+/* ──────────────────────────────────────
+   Save report
+────────────────────────────────────── */
+function saveReport() {
+    fetch('/save_report', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(collectFormData())
+    }).then(r => r.json()).then(function(res) {
+        var msg = document.getElementById('status-msg');
+        msg.innerText = res.message;
+        msg.style.color = res.status === 'success' ? 'green' : 'red';
+    });
+}
+
+/* ──────────────────────────────────────
+   Send report (screenshot → server)
+────────────────────────────────────── */
+function sendTest() {
+    saveReport();
+    var msg = document.getElementById('status-msg');
+    msg.innerText = '⏳ Đang chuẩn bị ảnh báo cáo...';
+    msg.style.color = 'orange';
+    document.body.classList.add('screenshot-mode');
+    setTimeout(function() {
+        html2canvas(document.querySelector('.container'), {scale: 2, useCORS: true, backgroundColor: '#fff'}).then(function(canvas) {
+            document.body.classList.remove('screenshot-mode');
+            fetch('/send_test_image', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({image: canvas.toDataURL('image/png')})
+            }).then(r => r.json()).then(function(res) {
+                msg.innerText = res.message;
+                msg.style.color = res.status === 'success' ? 'green' : 'red';
+            });
+        });
+    }, 150);
+}
+
+/* ──────────────────────────────────────
+   Export PDF  (client-side: html2canvas → jsPDF)
+   Giữ nguyên font tiếng Việt, màu sắc và icon
+────────────────────────────────────── */
+function exportPDF() {
+    var msg = document.getElementById('status-msg');
+    msg.innerText = '⏳ Đang tạo file PDF...';
+    msg.style.color = 'orange';
+
+    // Save data first
+    fetch('/save_report', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(collectFormData())
+    }).then(function() {
+        // Hide buttons/config for clean capture
+        document.body.classList.add('screenshot-mode');
+
+        // Tiny delay for CSS to apply
+        setTimeout(function() {
+            var target = document.querySelector('.container');
+            html2canvas(target, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#ffffff',
+                logging: false,
+                scrollX: 0,
+                scrollY: -window.scrollY
+            }).then(function(canvas) {
+                document.body.classList.remove('screenshot-mode');
+
+                var { jsPDF } = window.jspdf;
+                var imgData  = canvas.toDataURL('image/jpeg', 0.92);
+
+                // A4 dimensions in mm
+                var pdfW = 210;
+                var pdfH = 297;
+                var margin = 10;
+                var usableW = pdfW - margin * 2;
+
+                // Scale image to fit width, then paginate
+                var imgW = canvas.width;
+                var imgH = canvas.height;
+                var ratio = usableW / (imgW / 2);   // /2 because scale:2
+                var scaledH = (imgH / 2) * ratio;    // total height in mm
+
+                var usableH = pdfH - margin * 2;
+                var pages   = Math.ceil(scaledH / usableH);
+
+                var pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+                for (var p = 0; p < pages; p++) {
+                    if (p > 0) pdf.addPage();
+
+                    // Vertical offset in pixels (scale=2 canvas)
+                    var srcY  = p * usableH / ratio * 2;
+                    var srcH  = Math.min(usableH / ratio * 2, imgH - srcY);
+                    var destH = srcH * ratio / 2;
+
+                    // Crop slice from canvas
+                    var slice = document.createElement('canvas');
+                    slice.width  = imgW;
+                    slice.height = srcH;
+                    slice.getContext('2d').drawImage(canvas, 0, srcY, imgW, srcH, 0, 0, imgW, srcH);
+
+                    var sliceData = slice.toDataURL('image/jpeg', 0.92);
+                    pdf.addImage(sliceData, 'JPEG', margin, margin, usableW, destH);
+                }
+
+                // Build filename
+                var today = new Date();
+                var dd  = String(today.getDate()).padStart(2,'0');
+                var mm2 = String(today.getMonth()+1).padStart(2,'0');
+                var yyyy = today.getFullYear();
+                pdf.save('Daily_Report_' + dd + '-' + mm2 + '-' + yyyy + '.pdf');
+
+                msg.innerText = '✅ Đã tạo và tải PDF thành công!';
+                msg.style.color = 'green';
+            }).catch(function(err) {
+                document.body.classList.remove('screenshot-mode');
+                msg.innerText = '❌ Lỗi chụp màn hình: ' + err.message;
+                msg.style.color = 'red';
+            });
+        }, 200);
+    }).catch(function(err) {
+        msg.innerText = '❌ Lỗi lưu dữ liệu: ' + err.message;
+        msg.style.color = 'red';
+    });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+# ═══════════════════════════════════════════════════
+#  .gitignore – Daily Sync Report
+# ═══════════════════════════════════════════════════
+
+# Sensitive config – NEVER push passwords to GitHub!
+config.json
+latest_report.json
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# PyInstaller build artifacts
+build/
+dist/
+*.spec
+DailySyncReporter_v*/
+*.zip
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log
