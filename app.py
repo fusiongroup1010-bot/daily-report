@@ -25,11 +25,14 @@ app = Flask(__name__,
 BASE_DIR = os.path.abspath(os.path.dirname(sys.executable)) if getattr(sys, 'frozen', False) else os.path.abspath(".")
 CONFIG_FILE = os.path.join(BASE_DIR, 'config.json')
 DATA_FILE = os.path.join(BASE_DIR, 'latest_report.json')
+REPORTS_DIR = os.path.join(BASE_DIR, 'reports')
+os.makedirs(REPORTS_DIR, exist_ok=True)
 
 # Ghi de duong dan trong reporter de dong bo voi app.py
 import reporter
 reporter.CONFIG_FILE = CONFIG_FILE
 reporter.DATA_FILE = DATA_FILE
+
 
 def run_scheduler():
     """Vong lap chay ngam de kiem tra lich gui bao cao"""
@@ -53,7 +56,38 @@ def run_scheduler():
 @app.route('/')
 def index():
     config = load_config()
-    report_data = load_report_data()
+    today_str = datetime.now().strftime('%Y-%m-%d')
+    report_file = os.path.join(REPORTS_DIR, f"report_{today_str}.json")
+    
+    if os.path.exists(report_file):
+        try:
+            with open(report_file, 'r', encoding='utf-8') as f:
+                report_data = json.load(f)
+        except Exception:
+            report_data = load_report_data()
+    else:
+        # Default empty report structure for today
+        report_data = {
+            "report_date": today_str,
+            "department": "",
+            "receiving_depts": "",
+            "priority_issue": "",
+            "priority_impact": "",
+            "priority_deadline": "",
+            "task_online_info": "",
+            "task_offline_info": "",
+            "task_cs_info": "",
+            "task_logistics_info": "",
+            "task_mkt_hn_info": "",
+            "prep_logistics": "",
+            "prep_sales_online": "",
+            "prep_cs": "",
+            "prep_sales_offline": "",
+            "prep_mkt_hn": "",
+            "check1": False,
+            "check2": False,
+            "check3": False
+        }
     return render_template('index.html', config=config, report_data=report_data)
 
 @app.route('/settings')
@@ -61,18 +95,128 @@ def settings():
     config = load_config()
     return render_template('settings.html', config=config)
 
+@app.route('/get_report', methods=['GET'])
+def get_report():
+    date_str = request.args.get('date')
+    if not date_str:
+        return jsonify({"status": "error", "message": "Ngay khong hop le!"}), 400
+    
+    # Safe lookup (no path traversal)
+    date_str = os.path.basename(date_str)
+    report_file = os.path.join(REPORTS_DIR, f"report_{date_str}.json")
+    
+    if os.path.exists(report_file):
+        try:
+            with open(report_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return jsonify({"status": "success", "data": data})
+        except Exception as e:
+            return jsonify({"status": "error", "message": f"Loi doc file: {str(e)}"}), 500
+    else:
+        # Fallback to check if latest_report.json is for this date
+        try:
+            latest_data = load_report_data()
+            if latest_data.get('report_date') == date_str:
+                return jsonify({"status": "success", "data": latest_data})
+        except Exception:
+            pass
+            
+        # Empty template for selected date
+        default_data = {
+            "report_date": date_str,
+            "department": "",
+            "receiving_depts": "",
+            "priority_issue": "",
+            "priority_impact": "",
+            "priority_deadline": "",
+            "task_online_info": "",
+            "task_offline_info": "",
+            "task_cs_info": "",
+            "task_logistics_info": "",
+            "task_mkt_hn_info": "",
+            "prep_logistics": "",
+            "prep_sales_online": "",
+            "prep_cs": "",
+            "prep_sales_offline": "",
+            "prep_mkt_hn": "",
+            "check1": False,
+            "check2": False,
+            "check3": False
+        }
+        return jsonify({"status": "success", "data": default_data})
+
 @app.route('/save_report', methods=['POST'])
 def save_report():
     data = request.json
     try:
-        # Luu du lieu bao cao
-        with open(DATA_FILE, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=4, ensure_ascii=False)
+        report_date = data.get('report_date')
+        if not report_date:
+            report_date = datetime.now().strftime('%Y-%m-%d')
+            data['report_date'] = report_date
             
-        # Dong bo cau hinh he thong (neu co gui kem tu form index)
+        report_date = os.path.basename(report_date)
+        report_file = os.path.join(REPORTS_DIR, f"report_{report_date}.json")
+        
+        logged_in_dept = data.get('logged_in_dept')
+        
+        if os.path.exists(report_file):
+            try:
+                with open(report_file, 'r', encoding='utf-8') as f:
+                    existing_data = json.load(f)
+            except Exception:
+                existing_data = {}
+        else:
+            existing_data = {}
+            
+        if logged_in_dept and existing_data:
+            # Department fields mapping
+            dept_fields_map = {
+                "Sale Online": ["task_online_info", "prep_sales_online"],
+                "Sale Offline": ["task_offline_info", "prep_sales_offline"],
+                "C.S": ["task_cs_info", "prep_cs"],
+                "Logistics": ["task_logistics_info", "prep_logistics"],
+                "MKT HN": ["task_mkt_hn_info", "prep_mkt_hn"]
+            }
+            
+            # 1. Update only owned fields
+            allowed_fields = dept_fields_map.get(logged_in_dept, [])
+            for field in allowed_fields:
+                if field in data:
+                    existing_data[field] = data[field]
+                    
+            # 2. Update shared fields (always allowed)
+            shared_fields = [
+                "report_date", "receiving_depts", "priority_issue", 
+                "priority_impact", "priority_deadline", "check1", "check2", "check3"
+            ]
+            for field in shared_fields:
+                if field in data:
+                    existing_data[field] = data[field]
+            
+            # Last updating department
+            existing_data["department"] = logged_in_dept
+            final_data = existing_data
+        else:
+            # First save or no department logged-in, save everything
+            if logged_in_dept:
+                data["department"] = logged_in_dept
+            final_data = data
+            
+        # Save to historical report file
+        with open(report_file, 'w', encoding='utf-8') as f:
+            json.dump(final_data, f, indent=4, ensure_ascii=False)
+            
+        # Update latest_report.json for backward compatibility
+        with open(DATA_FILE, 'w', encoding='utf-8') as f:
+            json.dump(final_data, f, indent=4, ensure_ascii=False)
+            
+        # Sync system config
         if 'send_method' in data and 'report_time' in data:
-            with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
-                config = json.load(f)
+            if os.path.exists(CONFIG_FILE):
+                with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
+                    config = json.load(f)
+            else:
+                config = {}
             config['send_method'] = data['send_method']
             config['report_time'] = data['report_time']
             with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
@@ -81,6 +225,7 @@ def save_report():
         return jsonify({"status": "success", "message": "Da luu bao cao thanh cong!"})
     except Exception as e:
         return jsonify({"status": "error", "message": f"Loi luu file: {str(e)}"})
+
 
 @app.route('/send_test', methods=['POST'])
 def send_test():

@@ -117,13 +117,323 @@
 
         /* PDF / screenshot mode */
         .screenshot-mode .config-box,
+        .screenshot-mode #controlPanel,
         .screenshot-mode .actions { display: none !important; }
+
+        /* ═══════════════ PREMIUM DESIGN SYSTEM ═══════════════ */
+        :root {
+            --color-online: #5c6bc0;
+            --color-offline: #00897b;
+            --color-cs: #fb8c00;
+            --color-logistics: #1e88e5;
+            --color-mkt-hn: #ab47bc;
+            --color-primary: #1a5276;
+            --color-primary-light: #2980b9;
+        }
+
+        /* Glassmorphic Login Overlay */
+        #loginOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+        #loginOverlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .login-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            padding: 40px;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            text-align: center;
+            box-sizing: border-box;
+            transform: scale(1);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        #loginOverlay.hidden .login-card {
+            transform: scale(0.9);
+        }
+        .login-logo {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 20px rgba(26, 82, 118, 0.2);
+        }
+        .login-card h2 {
+            margin: 0 0 8px;
+            color: #0f172a;
+            font-size: 22px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .login-card p {
+            margin: 0 0 28px;
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .login-field {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .login-field label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 700;
+            font-size: 13px;
+            color: #334155;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .login-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 12px;
+            font-size: 15px;
+            background: white;
+            box-sizing: border-box;
+            outline: none;
+            transition: all 0.2s ease;
+            color: #0f172a;
+        }
+        .login-input:focus {
+            border-color: var(--color-primary-light);
+            box-shadow: 0 0 0 4px rgba(41, 128, 185, 0.15);
+        }
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(26, 82, 118, 0.25);
+            margin-top: 10px;
+        }
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(26, 82, 118, 0.35);
+        }
+        .login-btn:active {
+            transform: translateY(0);
+        }
+        .login-error {
+            color: #ef4444;
+            font-size: 13px;
+            margin-top: 14px;
+            font-weight: 600;
+            min-height: 20px;
+        }
+
+        /* Modern Control Panel */
+        #controlPanel {
+            background: white;
+            border-radius: 16px;
+            padding: 16px 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            box-sizing: border-box;
+        }
+        .ctrl-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .dept-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            font-weight: 700;
+            font-size: 14px;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            background: #64748b; /* default */
+            transition: background 0.3s ease;
+        }
+        .dept-badge.online { background-color: var(--color-online); }
+        .dept-badge.offline { background-color: var(--color-offline); }
+        .dept-badge.cs { background-color: var(--color-cs); }
+        .dept-badge.logistics { background-color: var(--color-logistics); }
+        .dept-badge.mkt-hn { background-color: var(--color-mkt-hn); }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #22c55e;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+            animation: pulse 1.6s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+
+        .ctrl-center {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .ctrl-center label {
+            font-weight: 700;
+            font-size: 14px;
+            color: #334155;
+        }
+        .date-select-input {
+            padding: 8px 16px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            outline: none;
+            color: #0f172a;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .date-select-input:focus {
+            border-color: var(--color-primary-light);
+        }
+
+        .btn-logout {
+            padding: 8px 18px;
+            border: 1.5px solid #cbd5e1;
+            background: white;
+            color: #64748b;
+            font-weight: 700;
+            font-size: 13px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-logout:hover {
+            border-color: #ef4444;
+            color: #ef4444;
+            background: #fef2f2;
+        }
+
+        /* Lock & Edit State Styling */
+        .readonly-field {
+            background-color: #f8fafc !important;
+            color: #64748b !important;
+            cursor: not-allowed !important;
+            border-left: 3px solid #cbd5e1 !important;
+        }
+        .active-owned-field {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+            font-weight: 500;
+        }
+        .active-owned-field.online { border-left: 4px solid var(--color-online) !important; }
+        .active-owned-field.offline { border-left: 4px solid var(--color-offline) !important; }
+        .active-owned-field.cs { border-left: 4px solid var(--color-cs) !important; }
+        .active-owned-field.logistics { border-left: 4px solid var(--color-logistics) !important; }
+        .active-owned-field.mkt-hn { border-left: 4px solid var(--color-mkt-hn) !important; }
+
+        /* Lock watermark */
+        .lock-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: #e06c75;
+            font-size: 11px;
+            font-weight: bold;
+            background: #fee2e2;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-top: 4px;
+            width: fit-content;
+        }
     </style>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
+
+<!-- ═══════════════ LOGIN OVERLAY ═══════════════ -->
+<div id="loginOverlay" class="hidden">
+    <div class="login-card">
+        <div class="login-logo">🔑</div>
+        <h2>Đăng nhập phòng ban</h2>
+        <p>Chọn phòng ban của bạn và nhập mật khẩu truy cập để chỉnh sửa báo cáo liên kết.</p>
+        
+        <div class="login-field">
+            <label>Phòng ban / Department</label>
+            <select id="login_dept" class="login-input">
+                <option value="Sale Online">Sale Online</option>
+                <option value="Sale Offline">Sale Offline</option>
+                <option value="C.S">C.S (Customer Service)</option>
+                <option value="Logistics">Logistics</option>
+                <option value="MKT HN">MKT HN</option>
+            </select>
+        </div>
+        
+        <div class="login-field">
+            <label>Mật khẩu / Password</label>
+            <input type="password" id="login_pass" class="login-input" placeholder="Nhập mật khẩu..." onkeydown="if(event.key==='Enter') loginDept()">
+        </div>
+        
+        <button type="button" class="login-btn" onclick="loginDept()">🔑 Đăng nhập</button>
+        <div id="login_error" class="login-error"></div>
+    </div>
+</div>
+
 <div class="container">
+
+    <!-- ═══════════════ CONTROL PANEL ═══════════════ -->
+    <div id="controlPanel">
+        <div class="ctrl-left">
+            <span class="dept-badge" id="activeDeptBadge">
+                <span class="pulse-dot"></span>
+                <span id="activeDeptText">Chưa đăng nhập</span>
+            </span>
+        </div>
+        <div class="ctrl-center">
+            <label for="nav_report_date">Xem báo cáo ngày:</label>
+            <input type="date" id="nav_report_date" class="date-select-input" onchange="loadReportForDate(this.value)">
+        </div>
+        <div>
+            <button type="button" class="btn-logout" onclick="logoutDept()">🚪 Đăng xuất</button>
+        </div>
+    </div>
 
     <!-- ═══════════════ CONFIG BOX ═══════════════ -->
     <div class="config-box" style="display: none;">
@@ -359,9 +669,30 @@ function autoResizeAll() {
 }
 
 window.onload = function() {
+    // 1. Initialize Date picker value in header to today's date in local time
+    var today = new Date();
+    var dd = String(today.getDate()).padStart(2, '0');
+    var mm = String(today.getMonth() + 1).padStart(2, '0');
+    var yyyy = today.getFullYear();
+    var todayStr = yyyy + '-' + mm + '-' + dd;
+    
+    var navDateInput = document.getElementById('nav_report_date');
+    if (navDateInput) {
+        navDateInput.value = todayStr;
+    }
+    
+    // 2. Set the main form date field value if empty
+    var formDateInput = document.querySelector('input[name="report_date"]');
+    if (formDateInput && !formDateInput.value) {
+        formDateInput.value = todayStr;
+    }
+
     toggleTasks();
     updateTimeDisplay("{{ config.report_time }}");
     autoResizeAll();
+    
+    // 3. Apply locks / login overlay
+    applyDeptLocks();
 };
 
 /* ──────────────────────────────────────
@@ -388,12 +719,18 @@ function saveSystemConfig() {
 function collectFormData() {
     var form = document.getElementById('reportForm');
     var data = Object.fromEntries(new FormData(form).entries());
-    data.send_method    = document.getElementById('config_method').value;
-    data.report_time    = document.getElementById('config_time').value;
+    
+    var methodEl = document.getElementById('config_method');
+    var timeEl = document.getElementById('config_time');
+    data.send_method = methodEl ? methodEl.value : 'email';
+    data.report_time = timeEl ? timeEl.value : '08:10';
+    
     data.receiving_depts = Array.from(form.querySelectorAll('input[name="rec_dept"]:checked')).map(cb => cb.value).join(', ');
     data.check1 = form.querySelector('input[name="check1"]').checked;
     data.check2 = form.querySelector('input[name="check2"]').checked;
     data.check3 = form.querySelector('input[name="check3"]').checked;
+    
+    data.logged_in_dept = localStorage.getItem('loggedInDept');
     return data;
 }
 
@@ -410,6 +747,208 @@ function saveReport() {
         msg.innerText = res.message;
         msg.style.color = res.status === 'success' ? 'green' : 'red';
     });
+}
+
+/* ──────────────────────────────────────
+   Authentication & Department Locks
+────────────────────────────────────── */
+function applyDeptLocks() {
+    var dept = localStorage.getItem('loggedInDept');
+    var errorEl = document.getElementById('login_error');
+    if (errorEl) errorEl.innerText = '';
+    
+    if (!dept) {
+        // Show Login Overlay
+        document.getElementById('loginOverlay').classList.remove('hidden');
+        document.getElementById('login_pass').value = '';
+        return;
+    }
+    
+    // Hide Login Overlay
+    document.getElementById('loginOverlay').classList.add('hidden');
+    
+    // Update Control Panel Badge
+    var badge = document.getElementById('activeDeptBadge');
+    var txtEl = document.getElementById('activeDeptText');
+    badge.className = 'dept-badge ' + getDeptClass(dept);
+    txtEl.innerHTML = '<span class="pulse-dot"></span> ' + dept;
+    
+    // Force Form Department Dropdown to match
+    var deptDropdown = document.getElementById('department');
+    if (deptDropdown) {
+        deptDropdown.value = dept;
+        deptDropdown.style.pointerEvents = 'none';
+        deptDropdown.style.backgroundColor = '#ebedef';
+    }
+    
+    // Department ownership mapping
+    var fieldsMap = {
+        "Sale Online": {
+            edit: ["task_online_info", "prep_sales_online"],
+            class: "online"
+        },
+        "Sale Offline": {
+            edit: ["task_offline_info", "prep_sales_offline"],
+            class: "offline"
+        },
+        "C.S": {
+            edit: ["task_cs_info", "prep_cs"],
+            class: "cs"
+        },
+        "Logistics": {
+            edit: ["task_logistics_info", "prep_logistics"],
+            class: "logistics"
+        },
+        "MKT HN": {
+            edit: ["task_mkt_hn_info", "prep_mkt_hn"],
+            class: "mkt-hn"
+        }
+    };
+    
+    // Reset all department textareas & remove old lock badges
+    document.querySelectorAll('.lock-badge').forEach(el => el.remove());
+    
+    var allKeys = Object.keys(fieldsMap);
+    allKeys.forEach(function(key) {
+        var isOwned = (key === dept);
+        var fields = fieldsMap[key].edit;
+        var styleClass = fieldsMap[key].class;
+        
+        fields.forEach(function(fieldName) {
+            var el = document.querySelector('[name="' + fieldName + '"]');
+            if (el) {
+                if (isOwned) {
+                    el.removeAttribute('readonly');
+                    el.className = 'active-owned-field ' + styleClass;
+                } else {
+                    el.setAttribute('readonly', 'true');
+                    el.className = 'readonly-field';
+                    
+                    // Proactively append a padlock watermark next to the field label if appropriate
+                    var rowEl = el.closest('.table-row');
+                    if (rowEl) {
+                        var lblCol = rowEl.querySelector('.table-col-label');
+                        if (lblCol && !lblCol.querySelector('.lock-badge')) {
+                            var lockSpan = document.createElement('span');
+                            lockSpan.className = 'lock-badge';
+                            lockSpan.innerHTML = '🔒 Chỉ đọc (' + key + ')';
+                            lblCol.appendChild(lockSpan);
+                        }
+                    }
+                }
+            }
+        });
+    });
+}
+
+function getDeptClass(dept) {
+    if (dept === 'Sale Online') return 'online';
+    if (dept === 'Sale Offline') return 'offline';
+    if (dept === 'C.S') return 'cs';
+    if (dept === 'Logistics') return 'logistics';
+    if (dept === 'MKT HN') return 'mkt-hn';
+    return '';
+}
+
+function loginDept() {
+    var dept = document.getElementById('login_dept').value;
+    var pass = document.getElementById('login_pass').value.trim();
+    var errorEl = document.getElementById('login_error');
+    
+    // Internal simple passwords: FS1234 or 1234
+    if (pass === 'FS1234' || pass === '1234') {
+        localStorage.setItem('loggedInDept', dept);
+        applyDeptLocks();
+        // Load report for the currently selected date to ensure fresh syncing
+        var dateVal = document.getElementById('nav_report_date').value;
+        if (dateVal) {
+            loadReportForDate(dateVal);
+        }
+    } else {
+        errorEl.innerText = '❌ Mật khẩu không chính xác!';
+    }
+}
+
+function logoutDept() {
+    if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+        localStorage.removeItem('loggedInDept');
+        applyDeptLocks();
+    }
+}
+
+/* ──────────────────────────────────────
+   Load Report by Date dynamically
+────────────────────────────────────── */
+function loadReportForDate(dateStr) {
+    if (!dateStr) return;
+    
+    var msg = document.getElementById('status-msg');
+    msg.innerText = '⏳ Đang tải dữ liệu báo cáo cho ngày ' + formatDateDisplay(dateStr) + '...';
+    msg.style.color = 'orange';
+    
+    fetch('/get_report?date=' + dateStr)
+        .then(r => r.json())
+        .then(function(res) {
+            if (res.status === 'success') {
+                var data = res.data;
+                
+                // Update all form inputs
+                var form = document.getElementById('reportForm');
+                
+                // Fill date input in form
+                var dateInput = form.querySelector('input[name="report_date"]');
+                if (!dateInput) dateInput = form.querySelector('input[type="date"]');
+                if (dateInput) dateInput.value = data.report_date || dateStr;
+                
+                // Set receiving department checkboxes
+                var rec = data.receiving_depts || '';
+                form.querySelectorAll('input[name="rec_dept"]').forEach(function(cb) {
+                    cb.checked = rec.includes(cb.value);
+                });
+                
+                // Fill textareas & priority text fields
+                form.querySelector('[name="priority_issue"]').value = data.priority_issue || '';
+                form.querySelector('[name="priority_impact"]').value = data.priority_impact || '';
+                form.querySelector('[name="priority_deadline"]').value = data.priority_deadline || '';
+                
+                form.querySelector('[name="task_online_info"]').value = data.task_online_info || '';
+                form.querySelector('[name="task_offline_info"]').value = data.task_offline_info || '';
+                form.querySelector('[name="task_cs_info"]').value = data.task_cs_info || '';
+                form.querySelector('[name="task_logistics_info"]').value = data.task_logistics_info || '';
+                form.querySelector('[name="task_mkt_hn_info"]').value = data.task_mkt_hn_info || '';
+                
+                form.querySelector('[name="prep_logistics"]').value = data.prep_logistics || '';
+                form.querySelector('[name="prep_sales_online"]').value = data.prep_sales_online || '';
+                form.querySelector('[name="prep_cs"]').value = data.prep_cs || '';
+                form.querySelector('[name="prep_sales_offline"]').value = data.prep_sales_offline || '';
+                form.querySelector('[name="prep_mkt_hn"]').value = data.prep_mkt_hn || '';
+                
+                // Checkboxes
+                form.querySelector('input[name="check1"]').checked = !!data.check1;
+                form.querySelector('input[name="check2"]').checked = !!data.check2;
+                form.querySelector('input[name="check3"]').checked = !!data.check3;
+                
+                // Trigger visibility updates and UI corrections
+                toggleTasks();
+                autoResizeAll();
+                applyDeptLocks();
+                
+                msg.innerText = '✅ Đã tải dữ liệu báo cáo của ngày ' + formatDateDisplay(dateStr) + '!';
+                msg.style.color = 'green';
+            } else {
+                msg.innerText = '❌ Không thể tải báo cáo: ' + res.message;
+                msg.style.color = 'red';
+            }
+        }).catch(function(err) {
+            msg.innerText = '❌ Lỗi kết nối: ' + err.message;
+            msg.style.color = 'red';
+        });
+}
+
+function formatDateDisplay(dateStr) {
+    if (!dateStr || !dateStr.includes('-')) return dateStr;
+    var parts = dateStr.split('-');
+    return parts[2] + '/' + parts[1] + '/' + parts[0];
 }
 
 /* ──────────────────────────────────────
