@@ -22,19 +22,121 @@ def load_report_data():
     with open(DATA_FILE, 'r', encoding='utf-8') as f:
         return json.load(f)
 
+def format_plain_contributions(data, field_prefix, target_dept):
+    senders = [
+        ("Sale Online", "sale_online"),
+        ("Sale Offline", "sale_offline"),
+        ("C.S", "cs"),
+        ("Logistics", "logistics"),
+        ("Phuc MKT", "mkt_hn")
+    ]
+    parts = []
+    display_target_dept = "Phuc MKT" if target_dept in ["MKT HN", "Phuc MKT"] else target_dept
+    
+    has_any_split_field = False
+    for name, key in senders:
+        val = data.get(f"{field_prefix}_from_{key}")
+        if val and val.strip():
+            has_any_split_field = True
+            break
+            
+    if not has_any_split_field:
+        legacy_field = f"{field_prefix}_info" if "task" in field_prefix else field_prefix
+        legacy_val = data.get(legacy_field)
+        if legacy_val and legacy_val.strip():
+            if "task" in field_prefix:
+                parts.append(f"  - {display_target_dept} tự phối hợp: {legacy_val.strip()}")
+            else:
+                parts.append(f"  - {display_target_dept} tự chuẩn bị: {legacy_val.strip()}")
+
+    for name, key in senders:
+        val = data.get(f"{field_prefix}_from_{key}")
+        if val and val.strip():
+            if name == display_target_dept:
+                if "task" in field_prefix:
+                    parts.append(f"  - {name} tự phối hợp: {val.strip()}")
+                else:
+                    parts.append(f"  - {name} tự chuẩn bị: {val.strip()}")
+            else:
+                parts.append(f"  - {name} yêu cầu: {val.strip()}")
+                
+    return "\n".join(parts) if parts else "  - —"
+
+
+def format_html_contributions(data, field_prefix, target_dept):
+    senders = [
+        ("Sale Online", "sale_online"),
+        ("Sale Offline", "sale_offline"),
+        ("C.S", "cs"),
+        ("Logistics", "logistics"),
+        ("Phuc MKT", "mkt_hn")
+    ]
+    parts = []
+    display_target_dept = "Phuc MKT" if target_dept in ["MKT HN", "Phuc MKT"] else target_dept
+    
+    has_any_split_field = False
+    for name, key in senders:
+        val = data.get(f"{field_prefix}_from_{key}")
+        if val and val.strip():
+            has_any_split_field = True
+            break
+            
+    if not has_any_split_field:
+        legacy_field = f"{field_prefix}_info" if "task" in field_prefix else field_prefix
+        legacy_val = data.get(legacy_field)
+        if legacy_val and legacy_val.strip():
+            esc_val = str(legacy_val).replace('\n', '<br>').strip()
+            if "task" in field_prefix:
+                parts.append(f"• <b>{display_target_dept} tự phối hợp:</b> {esc_val}")
+            else:
+                parts.append(f"• <b>{display_target_dept} tự chuẩn bị:</b> {esc_val}")
+
+    for name, key in senders:
+        val = data.get(f"{field_prefix}_from_{key}")
+        if val and val.strip():
+            esc_val = str(val).replace('\n', '<br>').strip()
+            if name == display_target_dept:
+                if "task" in field_prefix:
+                    parts.append(f"• <b>{name} tự phối hợp:</b> {esc_val}")
+                else:
+                    parts.append(f"• <b>{name} tự chuẩn bị:</b> {esc_val}")
+            else:
+                parts.append(f"• <b>{name} yêu cầu:</b> {esc_val}")
+                
+    return "<br>".join(parts) if parts else "—"
+
+
 def build_plain_report(data, config):
     if not data: return "Chưa có dữ liệu báo cáo."
     dept = data.get('department', 'N/A')
+    if dept == 'MKT HN':
+        dept = 'Phuc MKT'
     report_date = data.get('report_date','')
     if report_date and '-' in report_date:
         try: report_date = datetime.strptime(report_date, '%Y-%m-%d').strftime('%d/%m/%Y')
         except: pass
     rt = config.get('report_time', '08:10')
+    
+    rec_depts = data.get('receiving_depts', '')
+    task_parts = []
+    if 'Sale Online' in rec_depts:
+        task_parts.append(f"  Sale Online:\n{format_plain_contributions(data, 'task_online', 'Sale Online')}")
+    if 'Sale Offline' in rec_depts:
+        task_parts.append(f"  Sale Offline:\n{format_plain_contributions(data, 'task_offline', 'Sale Offline')}")
+    if 'C.S' in rec_depts:
+        task_parts.append(f"  C.S:\n{format_plain_contributions(data, 'task_cs', 'C.S')}")
+    if 'Logistics' in rec_depts:
+        task_parts.append(f"  Logistics:\n{format_plain_contributions(data, 'task_logistics', 'Logistics')}")
+    if 'MKT HN' in rec_depts:
+        task_parts.append(f"  Phuc MKT (MKT HN):\n{format_plain_contributions(data, 'task_mkt_hn', 'MKT HN')}")
+        
+    tasks_str = "\n".join(task_parts) if task_parts else "  (Không có nhiệm vụ liên kết)"
+    
     lines = [
         f"BAO CAO DAILY – PHOI HOP LIEN BO PHAN | {dept}",
         f"Gui luc {rt} sang",
         "=" * 50,
-        f"Ngay: {report_date} | BP Tiep nhan: {data.get('receiving_depts','All')}",
+        f"Ngay: {report_date} | BP Tiep nhan: {rec_depts or 'All'}",
         "",
         "VAN DE UU TIEN SO 1:",
         f"  Mo ta: {data.get('priority_issue','')}",
@@ -42,23 +144,22 @@ def build_plain_report(data, config):
         f"  Deadline: {data.get('priority_deadline','')}",
         "",
         "NHIEM VU LIEN KET:",
-        f"  Sale Online: {data.get('task_online_info','')}" if 'Sale Online' in data.get('receiving_depts','') else "",
-        f"  Sale Offline: {data.get('task_offline_info','')}" if 'Sale Offline' in data.get('receiving_depts','') else "",
-        f"  C.S: {data.get('task_cs_info','')}" if 'C.S' in data.get('receiving_depts','') else "",
-        f"  Logistics: {data.get('task_logistics_info','')}" if 'Logistics' in data.get('receiving_depts','') else "",
-        f"  MKT HN: {data.get('task_mkt_hn_info','')}" if 'MKT HN' in data.get('receiving_depts','') else "",
+        tasks_str,
         "",
         "CHUAN BI NGAY MAI:",
-        f"  Logistics: {data.get('prep_logistics','')}",
-        f"  Sale Online: {data.get('prep_sales_online','')}",
-        f"  C.S: {data.get('prep_cs','')}",
-        f"  Sale Offline: {data.get('prep_sales_offline','')}",
-        f"  MKT HN: {data.get('prep_mkt_hn','')}",
+        f"  Logistics:\n{format_plain_contributions(data, 'prep_logistics', 'Logistics')}",
+        f"  Sale Online:\n{format_plain_contributions(data, 'prep_sales_online', 'Sale Online')}",
+        f"  C.S:\n{format_plain_contributions(data, 'prep_cs', 'C.S')}",
+        f"  Sale Offline:\n{format_plain_contributions(data, 'prep_sales_offline', 'Sale Offline')}",
+        f"  Phuc MKT (MKT HN):\n{format_plain_contributions(data, 'prep_mkt_hn', 'MKT HN')}",
     ]
     return "\n".join(lines)
 
+
 def build_html_report(data, config):
     dept = data.get('department', 'N/A')
+    if dept == 'MKT HN':
+        dept = 'Phuc MKT'
     rt = config.get('report_time', '08:10')
     S = {
         'body': 'margin:0; padding:0; background-color:#f4f7f9; font-family:"Segoe UI",Helvetica,Arial,sans-serif;',
@@ -70,28 +171,28 @@ def build_html_report(data, config):
     }
     def section(vi, en): return f'<div style="{S["sect"]}">{vi} / {en}</div>'
     def row(vi, val):
-        val_display = str(val).replace('\n', '<br>') if val else '—'
-        return f'<tr style="border-top:1px solid #ddd;"><td style="{S["lbl"]}">{vi}</td><td style="{S["val"]}">{val_display}</td></tr>'
+        return f'<tr style="border-top:1px solid #ddd;"><td style="{S["lbl"]}">{vi}</td><td style="{S["val"]}">{val}</td></tr>'
 
     task_blocks = ''
     rec_list = data.get('receiving_depts', '')
     depts = [
-        ('Sale Online','🛒 Sale Online','task_online_info'),
-        ('Sale Offline','🏬 Sale Offline','task_offline_info'),
-        ('C.S','💬 C.S','task_cs_info'),
-        ('Logistics','📦 Logistics','task_logistics_info'),
-        ('MKT HN','📢 MKT HN','task_mkt_hn_info'),
+        ('Sale Online','🛒 Sale Online','task_online'),
+        ('Sale Offline','🏬 Sale Offline','task_offline'),
+        ('C.S','💬 C.S','task_cs'),
+        ('Logistics','📦 Logistics','task_logistics'),
+        ('MKT HN','📢 Phuc MKT (MKT HN)','task_mkt_hn'),
     ]
-    for key, title, field in depts:
+    for key, title, prefix in depts:
         if key in rec_list:
-            task_blocks += f'<div style="margin:0 0 12px; border:1px solid #ddd;"><div style="background:#2980b9; color:#fff; padding:8px 14px; font-weight:bold;">{title}</div><table width="100%" style="border-collapse:collapse;">{row("Nhiệm vụ cần phối hợp", data.get(field,""))}</table></div>'
+            task_content = format_html_contributions(data, prefix, key)
+            task_blocks += f'<div style="margin:0 0 12px; border:1px solid #ddd;"><div style="background:#2980b9; color:#fff; padding:8px 14px; font-weight:bold;">{title}</div><table width="100%" style="border-collapse:collapse;">{row("Nhiệm vụ phối hợp", task_content)}</table></div>'
 
     report_date = data.get('report_date','')
     if report_date and '-' in report_date:
         try: report_date = datetime.strptime(report_date, '%Y-%m-%d').strftime('%d/%m/%Y')
         except: pass
 
-    html = f"""<!DOCTYPE html><html><body style="{S['body']}"><div style="{S['wrap']}"><div style="{S['header']}"><h1>Báo Cáo Daily</h1><p>⏰ Gửi lúc {rt} sáng</p></div><div style="padding:16px;">{section('THÔNG TIN CHUNG', 'GENERAL INFO')}<table width="100%" style="border-collapse:collapse; border:1px solid #ddd;">{row('Ngày báo cáo', report_date)}{row('Bộ phận tiếp nhận', data.get('receiving_depts',''))}{row('Bộ phận báo cáo', dept)}</table>{section('NHIỆM VỤ LIÊN KẾT', 'CROSS-DEPT TASKS')}{task_blocks}{section('CHUẨN BỊ TRƯỚC CHO NGÀY MAI', 'PREPARATION')}<table width="100%" style="border-collapse:collapse; border:1px solid #ddd;">{row('Logistics', data.get('prep_logistics',''))}{row('Sale Online', data.get('prep_sales_online',''))}{row('C.S', data.get('prep_cs',''))}{row('Sale Offline', data.get('prep_sales_offline',''))}{row('MKT HN', data.get('prep_mkt_hn',''))}</table></div></div></body></html>"""
+    html = f"""<!DOCTYPE html><html><body style="{S['body']}"><div style="{S['wrap']}"><div style="{S['header']}"><h1>Báo Cáo Daily</h1><p>⏰ Gửi lúc {rt} sáng</p></div><div style="padding:16px;">{section('THÔNG TIN CHUNG', 'GENERAL INFO')}<table width="100%" style="border-collapse:collapse; border:1px solid #ddd;">{row('Ngày báo cáo', report_date)}{row('Bộ phận tiếp nhận', data.get('receiving_depts',''))}{row('Bộ phận báo cáo', dept)}</table>{section('NHIỆM VỤ LIÊN KẾT', 'CROSS-DEPT TASKS')}{task_blocks}{section('CHUẨN BỊ TRƯỚC CHO NGÀY MAI', 'PREPARATION')}<table width="100%" style="border-collapse:collapse; border:1px solid #ddd;">{row('Logistics', format_html_contributions(data, 'prep_logistics', 'Logistics'))}{row('Sale Online', format_html_contributions(data, 'prep_sales_online', 'Sale Online'))}{row('C.S', format_html_contributions(data, 'prep_cs', 'C.S'))}{row('Sale Offline', format_html_contributions(data, 'prep_sales_offline', 'Sale Offline'))}{row('Phuc MKT (MKT HN)', format_html_contributions(data, 'prep_mkt_hn', 'MKT HN'))}</table></div></div></body></html>"""
     return html
 
 def send_email(html_content, subject, config):

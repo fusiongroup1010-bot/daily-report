@@ -382,6 +382,158 @@
             margin-top: 4px;
             width: fit-content;
         }
+
+        /* ═══════════════ NESTED GRID & SPLIT-SENDER STYLES ═══════════════ */
+        .sender-grid {
+            display: flex;
+            flex-direction: column;
+            border-bottom: 1px solid #ddd;
+        }
+        .sender-row {
+            display: flex;
+            align-items: stretch;
+            border-top: 1px solid #eef2f5;
+            background: #fff;
+            transition: all 0.25s ease;
+        }
+        .sender-row:hover {
+            background: #f8fafc;
+        }
+        .sender-label {
+            width: 25%;
+            min-width: 25%;
+            max-width: 25%;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #475569;
+            background-color: #f1f5f9;
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            box-sizing: border-box;
+        }
+        .sender-label .self-text {
+            font-weight: normal;
+            font-size: 11px;
+            color: #64748b;
+            margin-left: 4px;
+            font-style: italic;
+        }
+        .sender-input-wrap {
+            width: 75%;
+            min-width: 75%;
+            max-width: 75%;
+            display: flex;
+            align-items: center;
+            box-sizing: border-box;
+            background: transparent;
+        }
+        .sender-input-wrap textarea {
+            width: 100%;
+            border: none;
+            padding: 6px 12px;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 13px;
+            outline: none;
+            resize: none;
+            background: transparent;
+            min-height: 32px;
+            max-height: 200px;
+            overflow-y: hidden;
+            line-height: 1.4;
+            color: #0f172a;
+        }
+        .sender-input-wrap textarea::placeholder {
+            color: #cbd5e1;
+            font-style: italic;
+            font-size: 12px;
+        }
+        
+        .sender-row.highlight-active {
+            background-color: rgba(248, 250, 252, 0.3);
+        }
+        
+        .sender-row.highlight-active.online {
+            border-left: 4px solid var(--color-online);
+            background-color: rgba(92, 107, 192, 0.04);
+        }
+        .sender-row.highlight-active.online .sender-label {
+            color: var(--color-online);
+            background-color: rgba(92, 107, 192, 0.08);
+        }
+        .sender-row.highlight-active.online textarea {
+            font-weight: 500;
+            color: #1e1b4b;
+        }
+        
+        .sender-row.highlight-active.offline {
+            border-left: 4px solid var(--color-offline);
+            background-color: rgba(0, 137, 123, 0.04);
+        }
+        .sender-row.highlight-active.offline .sender-label {
+            color: var(--color-offline);
+            background-color: rgba(0, 137, 123, 0.08);
+        }
+        .sender-row.highlight-active.offline textarea {
+            font-weight: 500;
+            color: #042f2e;
+        }
+        
+        .sender-row.highlight-active.cs {
+            border-left: 4px solid var(--color-cs);
+            background-color: rgba(251, 140, 0, 0.04);
+        }
+        .sender-row.highlight-active.cs .sender-label {
+            color: var(--color-cs);
+            background-color: rgba(251, 140, 0, 0.08);
+        }
+        .sender-row.highlight-active.cs textarea {
+            font-weight: 500;
+            color: #451a03;
+        }
+        
+        .sender-row.highlight-active.logistics {
+            border-left: 4px solid var(--color-logistics);
+            background-color: rgba(30, 136, 229, 0.04);
+        }
+        .sender-row.highlight-active.logistics .sender-label {
+            color: var(--color-logistics);
+            background-color: rgba(30, 136, 229, 0.08);
+        }
+        .sender-row.highlight-active.logistics textarea {
+            font-weight: 500;
+            color: #0c4a6e;
+        }
+        
+        .sender-row.highlight-active.mkt-hn {
+            border-left: 4px solid var(--color-mkt-hn);
+            background-color: rgba(171, 71, 188, 0.04);
+        }
+        .sender-row.highlight-active.mkt-hn .sender-label {
+            color: var(--color-mkt-hn);
+            background-color: rgba(171, 71, 188, 0.08);
+        }
+        .sender-row.highlight-active.mkt-hn textarea {
+            font-weight: 500;
+            color: #4a044e;
+        }
+        
+        .highlight-hint-banner {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-top: none;
+            padding: 6px 12px;
+            font-size: 12px;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .highlight-hint-banner strong {
+            font-weight: bold;
+        }
     </style>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -484,7 +636,7 @@
                     <option value="Sale Offline" {% if report_data.department == 'Sale Offline' %}selected{% endif %}>Sale Offline</option>
                     <option value="C.S"          {% if report_data.department == 'C.S'          %}selected{% endif %}>C.S (Customer Service)</option>
                     <option value="Logistics"    {% if report_data.department == 'Logistics'    %}selected{% endif %}>Logistics</option>
-                    <option value="MKT HN"       {% if report_data.department == 'MKT HN'       %}selected{% endif %}>MKT HN</option>
+                    <option value="MKT HN"       {% if report_data.department == 'MKT HN' or report_data.department == 'Phuc MKT' %}selected{% endif %}>MKT HN</option>
                 </select>
             </div>
         </div>
@@ -525,70 +677,274 @@
         <!-- Sale Online -->
         <div id="task_sale_online" class="task-group">
             <div class="task-group-header">🛒 Sale Online</div>
-            <div class="table-row" style="border-top:none;">
-                <div class="table-col-label">Nhiệm vụ cần phối hợp<br><small>Tasks to coordinate</small></div>
-                <div class="table-col-input"><textarea name="task_online_info">{{ report_data.task_online_info or '' }}</textarea></div>
+            <div class="sender-grid">
+                <div class="sender-row" data-sender="sale_online">
+                    <div class="sender-label">🛒 Sale Online<span class="self-text">(tự phối hợp)</span></div>
+                    <div class="sender-input-wrap"><textarea name="task_online_from_sale_online" placeholder="Sale Online tự phối hợp...">{{ report_data.task_online_from_sale_online or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="sale_offline">
+                    <div class="sender-label">🏬 Sale Offline yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="task_online_from_sale_offline" placeholder="Nhập yêu cầu từ Sale Offline cho Sale Online...">{{ report_data.task_online_from_sale_offline or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="cs">
+                    <div class="sender-label">💬 C.S yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="task_online_from_cs" placeholder="Nhập yêu cầu từ C.S cho Sale Online...">{{ report_data.task_online_from_cs or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="logistics">
+                    <div class="sender-label">📦 Logistics yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="task_online_from_logistics" placeholder="Nhập yêu cầu từ Logistics cho Sale Online...">{{ report_data.task_online_from_logistics or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="mkt_hn">
+                    <div class="sender-label">📢 Phuc MKT yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="task_online_from_mkt_hn" placeholder="Nhập yêu cầu từ Phuc MKT cho Sale Online...">{{ report_data.task_online_from_mkt_hn or '' }}</textarea></div>
+                </div>
             </div>
         </div>
 
         <!-- Sale Offline -->
         <div id="task_sale_offline" class="task-group">
             <div class="task-group-header">🏬 Sale Offline</div>
-            <div class="table-row" style="border-top:none;">
-                <div class="table-col-label">Nhiệm vụ cần phối hợp<br><small>Tasks to coordinate</small></div>
-                <div class="table-col-input"><textarea name="task_offline_info">{{ report_data.task_offline_info or '' }}</textarea></div>
+            <div class="sender-grid">
+                <div class="sender-row" data-sender="sale_online">
+                    <div class="sender-label">🛒 Sale Online yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="task_offline_from_sale_online" placeholder="Nhập yêu cầu từ Sale Online cho Sale Offline...">{{ report_data.task_offline_from_sale_online or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="sale_offline">
+                    <div class="sender-label">🏬 Sale Offline<span class="self-text">(tự phối hợp)</span></div>
+                    <div class="sender-input-wrap"><textarea name="task_offline_from_sale_offline" placeholder="Sale Offline tự phối hợp...">{{ report_data.task_offline_from_sale_offline or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="cs">
+                    <div class="sender-label">💬 C.S yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="task_offline_from_cs" placeholder="Nhập yêu cầu từ C.S cho Sale Offline...">{{ report_data.task_offline_from_cs or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="logistics">
+                    <div class="sender-label">📦 Logistics yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="task_offline_from_logistics" placeholder="Nhập yêu cầu từ Logistics cho Sale Offline...">{{ report_data.task_offline_from_logistics or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="mkt_hn">
+                    <div class="sender-label">📢 Phuc MKT yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="task_offline_from_mkt_hn" placeholder="Nhập yêu cầu từ Phuc MKT cho Sale Offline...">{{ report_data.task_offline_from_mkt_hn or '' }}</textarea></div>
+                </div>
             </div>
         </div>
 
         <!-- C.S -->
         <div id="task_cs" class="task-group">
             <div class="task-group-header">💬 C.S</div>
-            <div class="table-row" style="border-top:none;">
-                <div class="table-col-label">Nhiệm vụ cần phối hợp<br><small>Tasks to coordinate</small></div>
-                <div class="table-col-input"><textarea name="task_cs_info">{{ report_data.task_cs_info or '' }}</textarea></div>
+            <div class="sender-grid">
+                <div class="sender-row" data-sender="sale_online">
+                    <div class="sender-label">🛒 Sale Online yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="task_cs_from_sale_online" placeholder="Nhập yêu cầu từ Sale Online cho C.S...">{{ report_data.task_cs_from_sale_online or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="sale_offline">
+                    <div class="sender-label">🏬 Sale Offline yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="task_cs_from_sale_offline" placeholder="Nhập yêu cầu từ Sale Offline cho C.S...">{{ report_data.task_cs_from_sale_offline or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="cs">
+                    <div class="sender-label">💬 C.S<span class="self-text">(tự phối hợp)</span></div>
+                    <div class="sender-input-wrap"><textarea name="task_cs_from_cs" placeholder="C.S tự phối hợp...">{{ report_data.task_cs_from_cs or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="logistics">
+                    <div class="sender-label">📦 Logistics yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="task_cs_from_logistics" placeholder="Nhập yêu cầu từ Logistics cho C.S...">{{ report_data.task_cs_from_logistics or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="mkt_hn">
+                    <div class="sender-label">📢 Phuc MKT yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="task_cs_from_mkt_hn" placeholder="Nhập yêu cầu từ Phuc MKT cho C.S...">{{ report_data.task_cs_from_mkt_hn or '' }}</textarea></div>
+                </div>
             </div>
         </div>
 
         <!-- Logistics -->
         <div id="task_logistics" class="task-group">
             <div class="task-group-header">📦 Logistics</div>
-            <div class="table-row" style="border-top:none;">
-                <div class="table-col-label">Nhiệm vụ cần phối hợp<br><small>Tasks to coordinate</small></div>
-                <div class="table-col-input"><textarea name="task_logistics_info">{{ report_data.task_logistics_info or '' }}</textarea></div>
+            <div class="sender-grid">
+                <div class="sender-row" data-sender="sale_online">
+                    <div class="sender-label">🛒 Sale Online yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="task_logistics_from_sale_online" placeholder="Nhập yêu cầu từ Sale Online cho Logistics...">{{ report_data.task_logistics_from_sale_online or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="sale_offline">
+                    <div class="sender-label">🏬 Sale Offline yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="task_logistics_from_sale_offline" placeholder="Nhập yêu cầu từ Sale Offline cho Logistics...">{{ report_data.task_logistics_from_sale_offline or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="cs">
+                    <div class="sender-label">💬 C.S yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="task_logistics_from_cs" placeholder="Nhập yêu cầu từ C.S cho Logistics...">{{ report_data.task_logistics_from_cs or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="logistics">
+                    <div class="sender-label">📦 Logistics<span class="self-text">(tự phối hợp)</span></div>
+                    <div class="sender-input-wrap"><textarea name="task_logistics_from_logistics" placeholder="Logistics tự phối hợp...">{{ report_data.task_logistics_from_logistics or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="mkt_hn">
+                    <div class="sender-label">📢 Phuc MKT yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="task_logistics_from_mkt_hn" placeholder="Nhập yêu cầu từ Phuc MKT cho Logistics...">{{ report_data.task_logistics_from_mkt_hn or '' }}</textarea></div>
+                </div>
             </div>
         </div>
 
         <!-- MKT HN -->
         <div id="task_mkt_hn" class="task-group">
-            <div class="task-group-header">📢 MKT HN</div>
-            <div class="table-row" style="border-top:none;">
-                <div class="table-col-label">Nhiệm vụ cần phối hợp<br><small>Tasks to coordinate</small></div>
-                <div class="table-col-input"><textarea name="task_mkt_hn_info">{{ report_data.task_mkt_hn_info or '' }}</textarea></div>
+            <div class="task-group-header">📢 Phuc MKT</div>
+            <div class="sender-grid">
+                <div class="sender-row" data-sender="sale_online">
+                    <div class="sender-label">🛒 Sale Online yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="task_mkt_hn_from_sale_online" placeholder="Nhập yêu cầu từ Sale Online cho Phuc MKT...">{{ report_data.task_mkt_hn_from_sale_online or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="sale_offline">
+                    <div class="sender-label">🏬 Sale Offline yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="task_mkt_hn_from_sale_offline" placeholder="Nhập yêu cầu từ Sale Offline cho Phuc MKT...">{{ report_data.task_mkt_hn_from_sale_offline or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="cs">
+                    <div class="sender-label">💬 C.S yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="task_mkt_hn_from_cs" placeholder="Nhập yêu cầu từ C.S cho Phuc MKT...">{{ report_data.task_mkt_hn_from_cs or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="logistics">
+                    <div class="sender-label">📦 Logistics yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="task_mkt_hn_from_logistics" placeholder="Nhập yêu cầu từ Logistics cho Phuc MKT...">{{ report_data.task_mkt_hn_from_logistics or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="mkt_hn">
+                    <div class="sender-label">📢 Phuc MKT<span class="self-text">(tự phối hợp)</span></div>
+                    <div class="sender-input-wrap"><textarea name="task_mkt_hn_from_mkt_hn" placeholder="Phuc MKT tự phối hợp...">{{ report_data.task_mkt_hn_from_mkt_hn or '' }}</textarea></div>
+                </div>
             </div>
         </div>
 
         <!-- ─── CHUẨN BỊ NGÀY MAI ─── -->
         <div class="section-title" style="margin-top:20px;">📋 CHUẨN BỊ TRƯỚC CHO NGÀY MAI &nbsp;<small style="font-weight:normal">/ PREPARATION FOR TOMORROW</small></div>
 
-        <div class="table-row" style="border-top:1px solid #ddd;">
-            <div class="table-col-label">Logistics</div>
-            <div class="table-col-input"><textarea name="prep_logistics">{{ report_data.prep_logistics or '' }}</textarea></div>
+        <!-- Prep Logistics -->
+        <div class="task-group" style="display: block; border-top: 1px solid #ddd;">
+            <div class="task-group-header">📦 Logistics (Chuẩn bị ngày mai)</div>
+            <div class="sender-grid">
+                <div class="sender-row" data-sender="sale_online">
+                    <div class="sender-label">🛒 Sale Online yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="prep_logistics_from_sale_online" placeholder="Nhập yêu cầu chuẩn bị cho Logistics...">{{ report_data.prep_logistics_from_sale_online or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="sale_offline">
+                    <div class="sender-label">🏬 Sale Offline yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="prep_logistics_from_sale_offline" placeholder="Nhập yêu cầu chuẩn bị cho Logistics...">{{ report_data.prep_logistics_from_sale_offline or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="cs">
+                    <div class="sender-label">💬 C.S yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="prep_logistics_from_cs" placeholder="Nhập yêu cầu chuẩn bị cho Logistics...">{{ report_data.prep_logistics_from_cs or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="logistics">
+                    <div class="sender-label">📦 Logistics<span class="self-text">(tự chuẩn bị)</span></div>
+                    <div class="sender-input-wrap"><textarea name="prep_logistics_from_logistics" placeholder="Logistics tự chuẩn bị...">{{ report_data.prep_logistics_from_logistics or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="mkt_hn">
+                    <div class="sender-label">📢 Phuc MKT yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="prep_logistics_from_mkt_hn" placeholder="Nhập yêu cầu chuẩn bị cho Logistics...">{{ report_data.prep_logistics_from_mkt_hn or '' }}</textarea></div>
+                </div>
+            </div>
         </div>
-        <div class="table-row">
-            <div class="table-col-label">Sale Online</div>
-            <div class="table-col-input"><textarea name="prep_sales_online">{{ report_data.prep_sales_online or '' }}</textarea></div>
+
+        <!-- Prep Sale Online -->
+        <div class="task-group" style="display: block;">
+            <div class="task-group-header">🛒 Sale Online (Chuẩn bị ngày mai)</div>
+            <div class="sender-grid">
+                <div class="sender-row" data-sender="sale_online">
+                    <div class="sender-label">🛒 Sale Online<span class="self-text">(tự chuẩn bị)</span></div>
+                    <div class="sender-input-wrap"><textarea name="prep_sales_online_from_sale_online" placeholder="Sale Online tự chuẩn bị...">{{ report_data.prep_sales_online_from_sale_online or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="sale_offline">
+                    <div class="sender-label">🏬 Sale Offline yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="prep_sales_online_from_sale_offline" placeholder="Nhập yêu cầu chuẩn bị cho Sale Online...">{{ report_data.prep_sales_online_from_sale_offline or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="cs">
+                    <div class="sender-label">💬 C.S yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="prep_sales_online_from_cs" placeholder="Nhập yêu cầu chuẩn bị cho Sale Online...">{{ report_data.prep_sales_online_from_cs or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="logistics">
+                    <div class="sender-label">📦 Logistics yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="prep_sales_online_from_logistics" placeholder="Nhập yêu cầu chuẩn bị cho Sale Online...">{{ report_data.prep_sales_online_from_logistics or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="mkt_hn">
+                    <div class="sender-label">📢 Phuc MKT yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="prep_sales_online_from_mkt_hn" placeholder="Nhập yêu cầu chuẩn bị cho Sale Online...">{{ report_data.prep_sales_online_from_mkt_hn or '' }}</textarea></div>
+                </div>
+            </div>
         </div>
-        <div class="table-row">
-            <div class="table-col-label">C.S</div>
-            <div class="table-col-input"><textarea name="prep_cs">{{ report_data.prep_cs or '' }}</textarea></div>
+
+        <!-- Prep C.S -->
+        <div class="task-group" style="display: block;">
+            <div class="task-group-header">💬 C.S (Chuẩn bị ngày mai)</div>
+            <div class="sender-grid">
+                <div class="sender-row" data-sender="sale_online">
+                    <div class="sender-label">🛒 Sale Online yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="prep_cs_from_sale_online" placeholder="Nhập yêu cầu chuẩn bị cho C.S...">{{ report_data.prep_cs_from_sale_online or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="sale_offline">
+                    <div class="sender-label">🏬 Sale Offline yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="prep_cs_from_sale_offline" placeholder="Nhập yêu cầu chuẩn bị cho C.S...">{{ report_data.prep_cs_from_sale_offline or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="cs">
+                    <div class="sender-label">💬 C.S<span class="self-text">(tự chuẩn bị)</span></div>
+                    <div class="sender-input-wrap"><textarea name="prep_cs_from_cs" placeholder="C.S tự chuẩn bị...">{{ report_data.prep_cs_from_cs or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="logistics">
+                    <div class="sender-label">📦 Logistics yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="prep_cs_from_logistics" placeholder="Nhập yêu cầu chuẩn bị cho C.S...">{{ report_data.prep_cs_from_logistics or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="mkt_hn">
+                    <div class="sender-label">📢 Phuc MKT yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="prep_cs_from_mkt_hn" placeholder="Nhập yêu cầu chuẩn bị cho C.S...">{{ report_data.prep_cs_from_mkt_hn or '' }}</textarea></div>
+                </div>
+            </div>
         </div>
-        <div class="table-row">
-            <div class="table-col-label">Sale Offline</div>
-            <div class="table-col-input"><textarea name="prep_sales_offline">{{ report_data.prep_sales_offline or '' }}</textarea></div>
+
+        <!-- Prep Sale Offline -->
+        <div class="task-group" style="display: block;">
+            <div class="task-group-header">🏬 Sale Offline (Chuẩn bị ngày mai)</div>
+            <div class="sender-grid">
+                <div class="sender-row" data-sender="sale_online">
+                    <div class="sender-label">🛒 Sale Online yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="prep_sales_offline_from_sale_online" placeholder="Nhập yêu cầu chuẩn bị cho Sale Offline...">{{ report_data.prep_sales_offline_from_sale_online or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="sale_offline">
+                    <div class="sender-label">🏬 Sale Offline<span class="self-text">(tự chuẩn bị)</span></div>
+                    <div class="sender-input-wrap"><textarea name="prep_sales_offline_from_sale_offline" placeholder="Sale Offline tự chuẩn bị...">{{ report_data.prep_sales_offline_from_sale_offline or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="cs">
+                    <div class="sender-label">💬 C.S yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="prep_sales_offline_from_cs" placeholder="Nhập yêu cầu chuẩn bị cho Sale Offline...">{{ report_data.prep_sales_offline_from_cs or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="logistics">
+                    <div class="sender-label">📦 Logistics yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="prep_sales_offline_from_logistics" placeholder="Nhập yêu cầu chuẩn bị cho Sale Offline...">{{ report_data.prep_sales_offline_from_logistics or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="mkt_hn">
+                    <div class="sender-label">📢 Phuc MKT yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="prep_sales_offline_from_mkt_hn" placeholder="Nhập yêu cầu chuẩn bị cho Sale Offline...">{{ report_data.prep_sales_offline_from_mkt_hn or '' }}</textarea></div>
+                </div>
+            </div>
         </div>
-        <div class="table-row">
-            <div class="table-col-label">MKT HN</div>
-            <div class="table-col-input"><textarea name="prep_mkt_hn">{{ report_data.prep_mkt_hn or '' }}</textarea></div>
+
+        <!-- Prep MKT HN -->
+        <div class="task-group" style="display: block;">
+            <div class="task-group-header">📢 Phuc MKT (Chuẩn bị ngày mai)</div>
+            <div class="sender-grid">
+                <div class="sender-row" data-sender="sale_online">
+                    <div class="sender-label">🛒 Sale Online yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="prep_mkt_hn_from_sale_online" placeholder="Nhập yêu cầu chuẩn bị cho Phuc MKT...">{{ report_data.prep_mkt_hn_from_sale_online or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="sale_offline">
+                    <div class="sender-label">🏬 Sale Offline yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="prep_mkt_hn_from_sale_offline" placeholder="Nhập yêu cầu chuẩn bị cho Phuc MKT...">{{ report_data.prep_mkt_hn_from_sale_offline or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="cs">
+                    <div class="sender-label">💬 C.S yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="prep_mkt_hn_from_cs" placeholder="Nhập yêu cầu chuẩn bị cho Phuc MKT...">{{ report_data.prep_mkt_hn_from_cs or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="logistics">
+                    <div class="sender-label">📦 Logistics yêu cầu</div>
+                    <div class="sender-input-wrap"><textarea name="prep_mkt_hn_from_logistics" placeholder="Nhập yêu cầu chuẩn bị cho Phuc MKT...">{{ report_data.prep_mkt_hn_from_logistics or '' }}</textarea></div>
+                </div>
+                <div class="sender-row" data-sender="mkt_hn">
+                    <div class="sender-label">📢 Phuc MKT<span class="self-text">(tự chuẩn bị)</span></div>
+                    <div class="sender-input-wrap"><textarea name="prep_mkt_hn_from_mkt_hn" placeholder="Phuc MKT tự chuẩn bị...">{{ report_data.prep_mkt_hn_from_mkt_hn or '' }}</textarea></div>
+                </div>
+            </div>
         </div>
 
         <!-- ─── CHECKLIST ─── -->
@@ -697,61 +1053,9 @@ window.onload = function() {
 
 /* ──────────────────────────────────────
    Save system config (time / method)
-────────────────────────────────────── */
-function saveSystemConfig() {
-    var payload = {
-        send_method: document.getElementById('config_method').value,
-        report_time: document.getElementById('config_time').value
-    };
-    fetch('/update_config', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(payload)
-    }).then(r => r.json()).then(function(res) {
-        alert(res.message);
-        updateTimeDisplay(payload.report_time);
-    });
-}
-
-/* ──────────────────────────────────────
-   Collect form data
-────────────────────────────────────── */
-function collectFormData() {
-    var form = document.getElementById('reportForm');
-    var data = Object.fromEntries(new FormData(form).entries());
-    
-    var methodEl = document.getElementById('config_method');
-    var timeEl = document.getElementById('config_time');
-    data.send_method = methodEl ? methodEl.value : 'email';
-    data.report_time = timeEl ? timeEl.value : '08:10';
-    
-    data.receiving_depts = Array.from(form.querySelectorAll('input[name="rec_dept"]:checked')).map(cb => cb.value).join(', ');
-    data.check1 = form.querySelector('input[name="check1"]').checked;
-    data.check2 = form.querySelector('input[name="check2"]').checked;
-    data.check3 = form.querySelector('input[name="check3"]').checked;
-    
-    data.logged_in_dept = localStorage.getItem('loggedInDept');
-    return data;
-}
-
-/* ──────────────────────────────────────
-   Save report
-────────────────────────────────────── */
-function saveReport() {
-    fetch('/save_report', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(collectFormData())
-    }).then(r => r.json()).then(function(res) {
-        var msg = document.getElementById('status-msg');
-        msg.innerText = res.message;
-        msg.style.color = res.status === 'success' ? 'green' : 'red';
-    });
-}
-
-/* ──────────────────────────────────────
+──/* ──────────────────────────────────────
    Authentication & Department Locks
-────────────────────────────────────── */
+   ────────────────────────────────────── */
 function applyDeptLocks() {
     var dept = localStorage.getItem('loggedInDept');
     var errorEl = document.getElementById('login_error');
@@ -776,68 +1080,46 @@ function applyDeptLocks() {
     // Force Form Department Dropdown to match
     var deptDropdown = document.getElementById('department');
     if (deptDropdown) {
-        deptDropdown.value = dept;
+        deptDropdown.value = (dept === 'Phuc MKT') ? 'MKT HN' : dept;
         deptDropdown.style.pointerEvents = 'none';
         deptDropdown.style.backgroundColor = '#ebedef';
     }
     
-    // Department ownership mapping
-    var fieldsMap = {
-        "Sale Online": {
-            edit: ["task_online_info", "prep_sales_online"],
-            class: "online"
-        },
-        "Sale Offline": {
-            edit: ["task_offline_info", "prep_sales_offline"],
-            class: "offline"
-        },
-        "C.S": {
-            edit: ["task_cs_info", "prep_cs"],
-            class: "cs"
-        },
-        "Logistics": {
-            edit: ["task_logistics_info", "prep_logistics"],
-            class: "logistics"
-        },
-        "MKT HN": {
-            edit: ["task_mkt_hn_info", "prep_mkt_hn"],
-            class: "mkt-hn"
-        }
-    };
+    // Map loggedInDept to its data-sender attribute value
+    var senderKey = '';
+    if (dept === 'Sale Online') senderKey = 'sale_online';
+    else if (dept === 'Sale Offline') senderKey = 'sale_offline';
+    else if (dept === 'C.S') senderKey = 'cs';
+    else if (dept === 'Logistics') senderKey = 'logistics';
+    else if (dept === 'Phuc MKT' || dept === 'MKT HN') senderKey = 'mkt_hn';
     
-    // Reset all department textareas & remove old lock badges
-    document.querySelectorAll('.lock-badge').forEach(el => el.remove());
-    
-    var allKeys = Object.keys(fieldsMap);
-    allKeys.forEach(function(key) {
-        var isOwned = (key === dept);
-        var fields = fieldsMap[key].edit;
-        var styleClass = fieldsMap[key].class;
+    // Loop over all sender rows in the form and apply active styling
+    document.querySelectorAll('.sender-row').forEach(function(row) {
+        // Remove old highlight and specific color classes
+        row.classList.remove('highlight-active', 'online', 'offline', 'cs', 'logistics', 'mkt-hn');
         
-        fields.forEach(function(fieldName) {
-            var el = document.querySelector('[name="' + fieldName + '"]');
-            if (el) {
-                if (isOwned) {
-                    el.removeAttribute('readonly');
-                    el.className = 'active-owned-field ' + styleClass;
-                } else {
-                    el.setAttribute('readonly', 'true');
-                    el.className = 'readonly-field';
-                    
-                    // Proactively append a padlock watermark next to the field label if appropriate
-                    var rowEl = el.closest('.table-row');
-                    if (rowEl) {
-                        var lblCol = rowEl.querySelector('.table-col-label');
-                        if (lblCol && !lblCol.querySelector('.lock-badge')) {
-                            var lockSpan = document.createElement('span');
-                            lockSpan.className = 'lock-badge';
-                            lockSpan.innerHTML = '🔒 Chỉ đọc (' + key + ')';
-                            lblCol.appendChild(lockSpan);
-                        }
-                    }
-                }
+        var rowSender = row.getAttribute('data-sender');
+        if (rowSender === senderKey) {
+            row.classList.add('highlight-active');
+            // Add specific color class for active state
+            var colorClass = '';
+            if (rowSender === 'sale_online') colorClass = 'online';
+            else if (rowSender === 'sale_offline') colorClass = 'offline';
+            else if (rowSender === 'cs') colorClass = 'cs';
+            else if (rowSender === 'logistics') colorClass = 'logistics';
+            else if (rowSender === 'mkt_hn') colorClass = 'mkt-hn';
+            
+            if (colorClass) {
+                row.classList.add(colorClass);
             }
-        });
+        }
+        
+        // Ensure all textareas in these rows are NOT readonly (editable by anyone)
+        var textarea = row.querySelector('textarea');
+        if (textarea) {
+            textarea.removeAttribute('readonly');
+            textarea.className = '';
+        }
     });
 }
 
@@ -846,7 +1128,7 @@ function getDeptClass(dept) {
     if (dept === 'Sale Offline') return 'offline';
     if (dept === 'C.S') return 'cs';
     if (dept === 'Logistics') return 'logistics';
-    if (dept === 'MKT HN') return 'mkt-hn';
+    if (dept === 'MKT HN' || dept === 'Phuc MKT') return 'mkt-hn';
     return '';
 }
 
@@ -857,7 +1139,11 @@ function loginDept() {
     
     // Internal simple passwords: FS1234 or 1234
     if (pass === 'FS1234' || pass === '1234') {
-        localStorage.setItem('loggedInDept', dept);
+        if (dept === 'MKT HN') {
+            localStorage.setItem('loggedInDept', 'Phuc MKT');
+        } else {
+            localStorage.setItem('loggedInDept', dept);
+        }
         applyDeptLocks();
         // Load report for the currently selected date to ensure fresh syncing
         var dateVal = document.getElementById('nav_report_date').value;
@@ -878,7 +1164,7 @@ function logoutDept() {
 
 /* ──────────────────────────────────────
    Load Report by Date dynamically
-────────────────────────────────────── */
+   ────────────────────────────────────── */
 function loadReportForDate(dateStr) {
     if (!dateStr) return;
     
@@ -911,17 +1197,30 @@ function loadReportForDate(dateStr) {
                 form.querySelector('[name="priority_impact"]').value = data.priority_impact || '';
                 form.querySelector('[name="priority_deadline"]').value = data.priority_deadline || '';
                 
-                form.querySelector('[name="task_online_info"]').value = data.task_online_info || '';
-                form.querySelector('[name="task_offline_info"]').value = data.task_offline_info || '';
-                form.querySelector('[name="task_cs_info"]').value = data.task_cs_info || '';
-                form.querySelector('[name="task_logistics_info"]').value = data.task_logistics_info || '';
-                form.querySelector('[name="task_mkt_hn_info"]').value = data.task_mkt_hn_info || '';
+                // Fill split textareas
+                var target_keys_tasks = ["online", "offline", "cs", "logistics", "mkt_hn"];
+                var target_keys_prep = ["logistics", "sales_online", "cs", "sales_offline", "mkt_hn"];
+                var senders = ["sale_online", "sale_offline", "cs", "logistics", "mkt_hn"];
                 
-                form.querySelector('[name="prep_logistics"]').value = data.prep_logistics || '';
-                form.querySelector('[name="prep_sales_online"]').value = data.prep_sales_online || '';
-                form.querySelector('[name="prep_cs"]').value = data.prep_cs || '';
-                form.querySelector('[name="prep_sales_offline"]').value = data.prep_sales_offline || '';
-                form.querySelector('[name="prep_mkt_hn"]').value = data.prep_mkt_hn || '';
+                target_keys_tasks.forEach(function(target) {
+                    senders.forEach(function(sender) {
+                        var fieldName = 'task_' + target + '_from_' + sender;
+                        var el = form.querySelector('[name="' + fieldName + '"]');
+                        if (el) {
+                            el.value = data[fieldName] || '';
+                        }
+                    });
+                });
+                
+                target_keys_prep.forEach(function(target) {
+                    senders.forEach(function(sender) {
+                        var fieldName = 'prep_' + target + '_from_' + sender;
+                        var el = form.querySelector('[name="' + fieldName + '"]');
+                        if (el) {
+                            el.value = data[fieldName] || '';
+                        }
+                    });
+                });
                 
                 // Checkboxes
                 form.querySelector('input[name="check1"]').checked = !!data.check1;
