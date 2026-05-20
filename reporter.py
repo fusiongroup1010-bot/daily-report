@@ -46,12 +46,14 @@ def build_plain_report(data, config):
         f"  Sale Offline: {data.get('task_offline_info','')}" if 'Sale Offline' in data.get('receiving_depts','') else "",
         f"  C.S: {data.get('task_cs_info','')}" if 'C.S' in data.get('receiving_depts','') else "",
         f"  Logistics: {data.get('task_logistics_info','')}" if 'Logistics' in data.get('receiving_depts','') else "",
+        f"  MKT HN: {data.get('task_mkt_hn_info','')}" if 'MKT HN' in data.get('receiving_depts','') else "",
         "",
         "CHUAN BI NGAY MAI:",
         f"  Logistics: {data.get('prep_logistics','')}",
         f"  Sale Online: {data.get('prep_sales_online','')}",
         f"  C.S: {data.get('prep_cs','')}",
         f"  Sale Offline: {data.get('prep_sales_offline','')}",
+        f"  MKT HN: {data.get('prep_mkt_hn','')}",
     ]
     return "\n".join(lines)
 
@@ -73,7 +75,13 @@ def build_html_report(data, config):
 
     task_blocks = ''
     rec_list = data.get('receiving_depts', '')
-    depts = [('Sale Online','🛒 Sale Online','task_online_info'), ('Sale Offline','🏬 Sale Offline','task_offline_info'), ('C.S','💬 C.S','task_cs_info'), ('Logistics','📦 Logistics','task_logistics_info')]
+    depts = [
+        ('Sale Online','🛒 Sale Online','task_online_info'),
+        ('Sale Offline','🏬 Sale Offline','task_offline_info'),
+        ('C.S','💬 C.S','task_cs_info'),
+        ('Logistics','📦 Logistics','task_logistics_info'),
+        ('MKT HN','📢 MKT HN','task_mkt_hn_info'),
+    ]
     for key, title, field in depts:
         if key in rec_list:
             task_blocks += f'<div style="margin:0 0 12px; border:1px solid #ddd;"><div style="background:#2980b9; color:#fff; padding:8px 14px; font-weight:bold;">{title}</div><table width="100%" style="border-collapse:collapse;">{row("Nhiệm vụ cần phối hợp", data.get(field,""))}</table></div>'
@@ -83,7 +91,7 @@ def build_html_report(data, config):
         try: report_date = datetime.strptime(report_date, '%Y-%m-%d').strftime('%d/%m/%Y')
         except: pass
 
-    html = f"""<!DOCTYPE html><html><body style="{S['body']}"><div style="{S['wrap']}"><div style="{S['header']}"><h1>Báo Cáo Daily</h1><p>⏰ Gửi lúc {rt} sáng</p></div><div style="padding:16px;">{section('THÔNG TIN CHUNG', 'GENERAL INFO')}<table width="100%" style="border-collapse:collapse; border:1px solid #ddd;">{row('Ngày báo cáo', report_date)}{row('Bộ phận tiếp nhận', data.get('receiving_depts',''))}{row('Bộ phận báo cáo', dept)}</table>{section('NHIỆM VỤ LIÊN KẾT', 'CROSS-DEPT TASKS')}{task_blocks}{section('CHUẨN BỊ TRƯỚC CHO NGÀY MAI', 'PREPARATION')}<table width="100%" style="border-collapse:collapse; border:1px solid #ddd;">{row('Logistics', data.get('prep_logistics',''))}{row('Sale Online', data.get('prep_sales_online',''))}{row('C.S', data.get('prep_cs',''))}{row('Sale Offline', data.get('prep_sales_offline',''))}</table></div></div></body></html>"""
+    html = f"""<!DOCTYPE html><html><body style="{S['body']}"><div style="{S['wrap']}"><div style="{S['header']}"><h1>Báo Cáo Daily</h1><p>⏰ Gửi lúc {rt} sáng</p></div><div style="padding:16px;">{section('THÔNG TIN CHUNG', 'GENERAL INFO')}<table width="100%" style="border-collapse:collapse; border:1px solid #ddd;">{row('Ngày báo cáo', report_date)}{row('Bộ phận tiếp nhận', data.get('receiving_depts',''))}{row('Bộ phận báo cáo', dept)}</table>{section('NHIỆM VỤ LIÊN KẾT', 'CROSS-DEPT TASKS')}{task_blocks}{section('CHUẨN BỊ TRƯỚC CHO NGÀY MAI', 'PREPARATION')}<table width="100%" style="border-collapse:collapse; border:1px solid #ddd;">{row('Logistics', data.get('prep_logistics',''))}{row('Sale Online', data.get('prep_sales_online',''))}{row('C.S', data.get('prep_cs',''))}{row('Sale Offline', data.get('prep_sales_offline',''))}{row('MKT HN', data.get('prep_mkt_hn',''))}</table></div></div></body></html>"""
     return html
 
 def send_email(html_content, subject, config):

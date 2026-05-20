@@ -248,6 +248,7 @@ def export_pdf():
             ('Sale Offline', 'task_offline_info'),
             ('C.S',          'task_cs_info'),
             ('Logistics',    'task_logistics_info'),
+            ('MKT HN',       'task_mkt_hn_info'),
         ]
         for dept_key, field in dept_map:
             if dept_key in rec_list:
@@ -266,6 +267,7 @@ def export_pdf():
             ('Sale Online', data.get('prep_sales_online', '')),
             ('C.S',         data.get('prep_cs', '')),
             ('Sale Offline',data.get('prep_sales_offline', '')),
+            ('MKT HN',      data.get('prep_mkt_hn', '')),
         ]))
         story.append(Spacer(1, 4*mm))
 

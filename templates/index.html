@@ -126,7 +126,7 @@
 <div class="container">
 
     <!-- ═══════════════ CONFIG BOX ═══════════════ -->
-    <div class="config-box">
+    <div class="config-box" style="display: none;">
         <div class="config-row">
             <div class="config-field">
                 <label>Phương thức <small>(Method)</small>:</label>
@@ -151,7 +151,6 @@
         <div class="header-title">
             <h1>BÁO CÁO DAILY – PHỐI HỢP LIÊN BỘ PHẬN</h1>
             <p>DAILY SYNC REPORT</p>
-            <p>Gửi tự động lúc <strong id="display_time">--:--</strong> <span id="ampm_vn">sáng</span> / Sent at <strong id="display_time_en">--:--</strong> <span id="ampm_en">AM</span></p>
         </div>
         <div style="width:80px;"></div>
     </div>
@@ -175,6 +174,7 @@
                     <option value="Sale Offline" {% if report_data.department == 'Sale Offline' %}selected{% endif %}>Sale Offline</option>
                     <option value="C.S"          {% if report_data.department == 'C.S'          %}selected{% endif %}>C.S (Customer Service)</option>
                     <option value="Logistics"    {% if report_data.department == 'Logistics'    %}selected{% endif %}>Logistics</option>
+                    <option value="MKT HN"       {% if report_data.department == 'MKT HN'       %}selected{% endif %}>MKT HN</option>
                 </select>
             </div>
         </div>
@@ -188,6 +188,7 @@
                     <label><input type="checkbox" name="rec_dept" value="Sale Offline" onchange="toggleTasks()" {% if 'Sale Offline' in rec %}checked{% endif %}> Sale Offline</label>
                     <label><input type="checkbox" name="rec_dept" value="C.S"          onchange="toggleTasks()" {% if 'C.S'          in rec %}checked{% endif %}> C.S</label>
                     <label><input type="checkbox" name="rec_dept" value="Logistics"    onchange="toggleTasks()" {% if 'Logistics'    in rec %}checked{% endif %}> Logistics</label>
+                    <label><input type="checkbox" name="rec_dept" value="MKT HN"       onchange="toggleTasks()" {% if 'MKT HN'       in rec %}checked{% endif %}> MKT HN</label>
                 </div>
             </div>
         </div>
@@ -247,6 +248,15 @@
             </div>
         </div>
 
+        <!-- MKT HN -->
+        <div id="task_mkt_hn" class="task-group">
+            <div class="task-group-header">📢 MKT HN</div>
+            <div class="table-row" style="border-top:none;">
+                <div class="table-col-label">Nhiệm vụ cần phối hợp<br><small>Tasks to coordinate</small></div>
+                <div class="table-col-input"><textarea name="task_mkt_hn_info">{{ report_data.task_mkt_hn_info or '' }}</textarea></div>
+            </div>
+        </div>
+
         <!-- ─── CHUẨN BỊ NGÀY MAI ─── -->
         <div class="section-title" style="margin-top:20px;">📋 CHUẨN BỊ TRƯỚC CHO NGÀY MAI &nbsp;<small style="font-weight:normal">/ PREPARATION FOR TOMORROW</small></div>
 
@@ -265,6 +275,10 @@
         <div class="table-row">
             <div class="table-col-label">Sale Offline</div>
             <div class="table-col-input"><textarea name="prep_sales_offline">{{ report_data.prep_sales_offline or '' }}</textarea></div>
+        </div>
+        <div class="table-row">
+            <div class="table-col-label">MKT HN</div>
+            <div class="table-col-input"><textarea name="prep_mkt_hn">{{ report_data.prep_mkt_hn or '' }}</textarea></div>
         </div>
 
         <!-- ─── CHECKLIST ─── -->
@@ -288,7 +302,6 @@
 
     <div class="actions">
         <button class="btn btn-save" onclick="saveReport()">💾 LƯU DỮ LIỆU<br><small style="font-weight:normal">SAVE DATA</small></button>
-        <button class="btn btn-send" onclick="sendTest()">📤 GỬI BÁO CÁO NGAY<br><small style="font-weight:normal">SEND REPORT NOW</small></button>
         <button class="btn btn-pdf"  onclick="exportPDF()">📄 XUẤT FILE PDF<br><small style="font-weight:normal">EXPORT PDF</small></button>
         <div id="status-msg" style="margin-top:14px; font-weight:bold; font-size:15px;"></div>
     </div>
@@ -305,6 +318,7 @@ function toggleTasks() {
     document.getElementById('task_sale_offline').style.display = checked.includes('Sale Offline') ? 'block' : 'none';
     document.getElementById('task_cs').style.display           = checked.includes('C.S')          ? 'block' : 'none';
     document.getElementById('task_logistics').style.display    = checked.includes('Logistics')    ? 'block' : 'none';
+    document.getElementById('task_mkt_hn').style.display       = checked.includes('MKT HN')       ? 'block' : 'none';
 }
 
 /* ──────────────────────────────────────
@@ -318,10 +332,16 @@ function updateTimeDisplay(timeStr) {
     if (hour >= 12) { period = 'PM'; periodVn = 'chiều'; if (hour > 12) h12 = hour - 12; }
     else if (hour === 0) h12 = 12;
     var fmt = (h12 < 10 ? '0' : '') + h12 + ':' + (min < 10 ? '0' : '') + min;
-    document.getElementById('display_time').innerText    = fmt;
-    document.getElementById('display_time_en').innerText = fmt;
-    document.getElementById('ampm_vn').innerText = periodVn;
-    document.getElementById('ampm_en').innerText = period;
+    
+    var elDisplayTime = document.getElementById('display_time');
+    var elDisplayTimeEn = document.getElementById('display_time_en');
+    var elAmpmVn = document.getElementById('ampm_vn');
+    var elAmpmEn = document.getElementById('ampm_en');
+    
+    if (elDisplayTime) elDisplayTime.innerText = fmt;
+    if (elDisplayTimeEn) elDisplayTimeEn.innerText = fmt;
+    if (elAmpmVn) elAmpmVn.innerText = periodVn;
+    if (elAmpmEn) elAmpmEn.innerText = period;
 }
 
 /* ──────────────────────────────────────
