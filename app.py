@@ -137,11 +137,11 @@ def format_pdf_contributions(data, field_prefix, target_dept):
         ("Sale Offline", "sale_offline"),
         ("C.S", "cs"),
         ("Logistics", "logistics"),
-        ("Phuc MKT", "mkt_hn")
+        ("MKT", "mkt_hn")
     ]
     parts = []
     
-    display_target_dept = "Phuc MKT" if target_dept in ["MKT HN", "Phuc MKT"] else target_dept
+    display_target_dept = "MKT" if target_dept in ["MKT HN", "Phuc MKT", "MKT"] else target_dept
     
     has_any_split_field = False
     for name, key in senders:
@@ -451,7 +451,7 @@ def export_pdf():
         story.append(section_table('THONG TIN CHUNG / GENERAL INFORMATION', [
             ('Ngay bao cao',          report_date),
             ('Bo phan tiep nhan',     data.get('receiving_depts', '')),
-            ('Bo phan bao cao',       data.get('department', '')),
+            ('Bo phan bao cao',       'MKT' if data.get('department', '') in ['MKT HN', 'Phuc MKT', 'MKT'] else data.get('department', '')),
         ]))
         story.append(Spacer(1, 4*mm))
 
@@ -467,14 +467,14 @@ def export_pdf():
         rec_list  = data.get('receiving_depts', '')
         task_rows = []
         dept_map  = [
-            ('Sale Online',  'task_online'),
-            ('Sale Offline', 'task_offline'),
-            ('C.S',          'task_cs'),
-            ('Logistics',    'task_logistics'),
-            ('MKT HN',       'task_mkt_hn'),
+            ('Sale Online',  'task_online', ['Sale Online']),
+            ('Sale Offline', 'task_offline', ['Sale Offline']),
+            ('C.S',          'task_cs', ['C.S']),
+            ('Logistics',    'task_logistics', ['Logistics']),
+            ('MKT',          'task_mkt_hn', ['MKT', 'MKT HN', 'Phuc MKT']),
         ]
-        for dept_key, prefix in dept_map:
-            if dept_key in rec_list:
+        for dept_key, prefix, aliases in dept_map:
+            if any(alias in rec_list for alias in aliases):
                 task_rows.append((dept_key, format_pdf_contributions(data, prefix, dept_key)))
 
         if task_rows:
@@ -485,13 +485,23 @@ def export_pdf():
         story.append(Spacer(1, 4*mm))
 
         # Chuan bi ngay mai
-        story.append(section_table('CHUAN BI TRUOC CHO NGAY MAI / PREPARATION FOR TOMORROW', [
-            ('Logistics',   format_pdf_contributions(data, 'prep_logistics', 'Logistics')),
-            ('Sale Online', format_pdf_contributions(data, 'prep_sales_online', 'Sale Online')),
-            ('C.S',         format_pdf_contributions(data, 'prep_cs', 'C.S')),
-            ('Sale Offline',format_pdf_contributions(data, 'prep_sales_offline', 'Sale Offline')),
-            ('MKT HN',      format_pdf_contributions(data, 'prep_mkt_hn', 'MKT HN')),
-        ]))
+        prep_rows = []
+        prep_map = [
+            ('Logistics',    'prep_logistics',     ['Logistics']),
+            ('Sale Online',  'prep_sales_online',  ['Sale Online']),
+            ('C.S',          'prep_cs',            ['C.S']),
+            ('Sale Offline', 'prep_sales_offline', ['Sale Offline']),
+            ('MKT',          'prep_mkt_hn',        ['MKT', 'MKT HN', 'Phuc MKT']),
+        ]
+        for dept_key, prefix, aliases in prep_map:
+            if any(alias in rec_list for alias in aliases):
+                prep_rows.append((dept_key, format_pdf_contributions(data, prefix, dept_key)))
+
+        if prep_rows:
+            story.append(section_table('CHUAN BI TRUOC CHO NGAY MAI / PREPARATION FOR TOMORROW', prep_rows))
+        else:
+            story.append(section_table('CHUAN BI TRUOC CHO NGAY MAI / PREPARATION FOR TOMORROW',
+                                       [('(Chua co chuan bi cho ngay mai duoc chon)', '')]))
         story.append(Spacer(1, 4*mm))
 
         # Checklist
